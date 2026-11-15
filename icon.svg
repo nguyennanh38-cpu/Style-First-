@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Quill and parchment">
+<defs>
+ <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff4d4"/><stop offset="1" stop-color="#edc889"/></linearGradient>
+ <linearGradient id="feather" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d27751"/><stop offset=".75" stop-color="#8e433b"/><stop offset="1" stop-color="#682c35"/></linearGradient>
+</defs>
+<rect x="2" y="2" width="124" height="124" rx="27" fill="#fffbf3" stroke="#ead7bc" stroke-width="3"/>
+<g stroke="#734a2d" stroke-linecap="round" stroke-linejoin="round">
+ <path d="M28 34h64v69H27c-6 0-9-5-9-11V43c0-5 4-9 10-9Z" fill="url(#paper)" stroke-width="3.5"/>
+ <path d="M28 34c-6 0-10 5-10 11 0 6 3 9 8 9 3 0 6-2 6-6 0-4-2-5-5-5" fill="#f7d89e" stroke-width="3"/>
+ <path d="M27 101c6-7 12-8 18-6h47c6 0 9 4 9 10 0 5-4 9-10 9H35c-6 0-10-5-8-13Z" fill="#f3d19a" stroke-width="3"/>
+ <path d="M39 61h31M39 71h25M39 81h18" stroke="#cba572" stroke-width="3"/>
+ <path d="M92 95c-2 6-2 11 0 19" fill="none" stroke-width="3"/>
+</g>
+<path d="M44 96C62 65 78 36 108 15c6 12-4 33-15 46C79 78 60 89 44 96Z" fill="url(#feather)" stroke="#6a3233" stroke-width="3" stroke-linejoin="round"/>
+<path d="M45 98c16-25 34-48 59-78" fill="none" stroke="#e3ad66" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M59 79 70 67M68 69l-2-16M80 56l17-12M84 44l2-15" stroke="#eab48f" stroke-width="2.2" opacity=".7" stroke-linecap="round"/>
+<path d="M44 96 37 110" stroke="#8f553b" stroke-width="3.3" stroke-linecap="round"/>
+</svg>
