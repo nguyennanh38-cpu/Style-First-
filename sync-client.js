@@ -3,7 +3,7 @@
 const STORAGE='style-first-workbook-v1';
 const OWNER='style-first-cloud-owner';
 const SYNC_DELAY=1200;
-let enabled=false, email=null, pending=null, syncing=false, dirty=false, lastSynced=0, loginBusy=false;
+let enabled=false, email=null, pending=null, syncing=false, dirty=false, lastSynced=0, loginBusy=false, editRevision=0;
 const $=id=>document.getElementById(id);
 const h=t=>String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const state=()=>{try{const d=JSON.parse(localStorage.getItem(STORAGE));return {version:1,essays:d.essays||[],selectedId:d.selectedId||null,deletedIds:d.deletedIds||[]};}catch{return {version:1,essays:[],selectedId:null,deletedIds:[]}}};
@@ -68,24 +68,25 @@ function useCloud(stateCloud){
  const data={...stateCloud,accessCode:local.accessCode||'',version:1};
  suspendWrites(()=>{
   localStorage.setItem(STORAGE,JSON.stringify(data));
-  if(typeof db!=='undefined'){db=data;render();}
+  if(typeof db!=='undefined'){db=data;if(!document.activeElement?.matches('textarea,input'))render();}
  });
 }
 async function push(interactive=false){
  if(!enabled||!email){if(interactive)notice('Please sign in first.');return;}
  if(syncing){dirty=true;return;}
  syncing=true;status('Synchronizing changes...',true);
+ const revAtStart=editRevision;
  try{
   const res=await request('/api/sync/merge',{state:state()});
-  // If something was edited during the network request, merge back and repeat.
-  useCloud(res.state);
-  lastSynced=Date.now();dirty=false;status('All saved changes synchronized',true);
+  // Never overwrite answers typed while the network request was in flight.
+  if(editRevision!==revAtStart){dirty=true;status('Saving newer edits...',true);}
+  else{useCloud(res.state);lastSynced=Date.now();dirty=false;status('All saved changes synchronized',true);}
  }catch(e){dirty=true;status('Sync failed — changes remain on this browser',false);if(interactive)notice(e.message);}
  finally{syncing=false;if(dirty&&email){setTimeout(()=>{if(!syncing)push(false)},8000);}}
 }
 function schedule(){
  if(!email||!enabled||window.styleSyncDisabled)return;
- dirty=true;clearTimeout(pending);pending=setTimeout(()=>push(),SYNC_DELAY);
+ dirty=true;editRevision++;clearTimeout(pending);pending=setTimeout(()=>push(),SYNC_DELAY);
 }
 async function authenticate(mode){
  if(loginBusy)return;
