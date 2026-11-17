@@ -117,7 +117,7 @@ function mergeProgress(a={},b={}){
   }
   return out;
 }
-function mergeStates(a,b){
+export function mergeStates(a,b){
   const left=validateState(a),right=validateState(b);
   const deleted=new Set([...left.deletedIds,...right.deletedIds]);
   const merged=new Map();
