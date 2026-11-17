@@ -2,6 +2,7 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {syncRoute,syncEnabled} from './sync.mjs';
 
 const DIR = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
@@ -54,7 +55,7 @@ unguided:(p.unguided||[]).filter(x=>within(x.answer,essay)).slice(0,8),
 reasoning_chains:(p.reasoning_chains||[]).filter(x=>within(x.evidence,essay)&&x.steps?.length>=2&&x.steps.every(s=>within(s,x.evidence))).slice(0,4)
 };}
 async function route(req,res,url){
-if(req.method==='GET'&&url==='/api/health')return reply(res,200,{ai:HAS_AI,model:HAS_AI?MODEL:null,accessCodeRequired:Boolean(process.env.APP_ACCESS_CODE)});
+if(req.method==='GET'&&url==='/api/health')return reply(res,200,{ai:HAS_AI,model:HAS_AI?MODEL:null,accessCodeRequired:Boolean(process.env.APP_ACCESS_CODE),sync:syncEnabled});
 if(req.method!=='POST')return reply(res,405,{error:'Method not allowed'});
 if(!throttle(req))return reply(res,429,{error:'Rate limit exceeded'});
 if(process.env.APP_ACCESS_CODE&&req.headers['x-app-code']!==process.env.APP_ACCESS_CODE)return reply(res,401,{error:'Incorrect access code'});
@@ -79,6 +80,7 @@ return reply(res,404,{error:'Not found'});
 }
 const server=http.createServer(async(req,res)=>{try{
 const u=new URL(req.url||'/', 'http://localhost');
+if(await syncRoute(req,res,u.pathname))return;
 if(u.pathname.startsWith('/api/'))return await route(req,res,u.pathname);
 if(req.method!=='GET')return reply(res,405,{error:'Method not allowed'});
 const dest=u.pathname==='/'?'index.html':u.pathname.slice(1);
