@@ -13,6 +13,8 @@ const pool=process.env.DATABASE_URL?new Pool({
 export const syncEnabled=Boolean(pool);
 let schemaReady;
 const LIMIT=2_000_000;
+const authAttempts=new Map();
+function guardAuth(req,email){const key=(req.socket.remoteAddress||'?')+':'+email;const now=Date.now();const recent=(authAttempts.get(key)||[]).filter(t=>now-t<900000);if(recent.length>=12)throw err(429,'Too many login attempts. Try again later.');recent.push(now);authAttempts.set(key,recent);if(authAttempts.size>2000)for(const [k,v]of authAttempts)if(!v.length||now-v.at(-1)>900000)authAttempts.delete(k);}
 const blankState=()=>({version:1,essays:[],selectedId:null,deletedIds:[]});
 function err(status,message){const e=new Error(message);e.status=status;return e;}
 function json(res,status,body,headers={}){
@@ -151,6 +153,7 @@ export async function syncRoute(req,res,pathname){
     if(req.method!=='POST')throw err(405,'Method not allowed');
     if(pathname==='/api/auth/register'||pathname==='/api/auth/login'){
       const data=await body(req),email=normalizeEmail(data.email),password=validPassword(data.password);
+      guardAuth(req,email);
       if(pathname==='/api/auth/register'){
         const exists=await pool.query('SELECT id FROM style_users WHERE email=$1',[email]);
         if(exists.rowCount)throw err(409,'An account with this email already exists. Please sign in.');
