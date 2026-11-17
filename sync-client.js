@@ -68,17 +68,18 @@ function useCloud(stateCloud){
  const data={...stateCloud,accessCode:local.accessCode||'',version:1};
  suspendWrites(()=>{
   localStorage.setItem(STORAGE,JSON.stringify(data));
-  if(typeof db!=='undefined'){db=data;if(!document.activeElement?.matches('textarea,input'))render();}
+  if(typeof db!=='undefined'){db=data;if(!db.essays?.length||!db.essays.some(e=>e.id===db.selectedId))mode='dashboard';if(!document.activeElement?.matches('textarea,input'))render();}
  });
 }
 async function push(interactive=false){
  if(!enabled||!email){if(interactive)notice('Please sign in first.');return;}
  if(syncing){dirty=true;return;}
  syncing=true;status('Synchronizing changes...',true);
- const revAtStart=editRevision;
+ const revAtStart=editRevision,accountAtStart=email;
  try{
   const res=await request('/api/sync/merge',{state:state()});
   // Never overwrite answers typed while the network request was in flight.
+  if(email!==accountAtStart)return;
   if(editRevision!==revAtStart){dirty=true;status('Saving newer edits...',true);}
   else{useCloud(res.state);lastSynced=Date.now();dirty=false;status('All saved changes synchronized',true);}
  }catch(e){dirty=true;status('Sync failed — changes remain on this browser',false);if(interactive)notice(e.message);}
