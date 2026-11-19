@@ -27,7 +27,7 @@ function build(original,submitted){
    else if(a[i].key===b[j].key)dp[i][j]=dp[i+1][j+1];
    else dp[i][j]=1+Math.min(dp[i+1][j+1],dp[i+1][j],dp[i][j+1]);
  }
- const mask=new Uint8Array(n),extras=[];
+ const mask=new Uint8Array(n),mistakes=new Uint8Array(n),extras=[];
  let i=0,j=0;
  while(i<n||j<m){
    if(i<n&&j<m&&a[i].key===b[j].key&&dp[i][j]===dp[i+1][j+1]){i++;j++;continue;}
@@ -35,8 +35,8 @@ function build(original,submitted){
    const remove=i<n?dp[i+1][j]:Infinity;
    const insert=j<m?dp[i][j+1]:Infinity;
    const minimum=Math.min(sub,remove,insert);
-   if(minimum===sub){mask[i]=1;i++;j++;}
-   else if(minimum===remove){mask[i]=1;i++;}
+   if(minimum===sub){mask[i]=1;mistakes[i]=1;i++;j++;}
+   else if(minimum===remove){mask[i]=1;mistakes[i]=1;i++;}
    else{
      // Pure extra words need a cloze too: mask a short neighboring original phrase.
      extras.push(b[j].text);
@@ -63,7 +63,7 @@ function build(original,submitted){
    cursor=last.end;
  }
  parts.push({type:'text',text:text.slice(cursor)});
- return {parts,blanks,extra:extras};
+ return {parts,blanks,extra:extras,errorWords:a.filter((w,k)=>mistakes[k]).map(w=>({start:w.start,end:w.end}))};
 }
 root.MistakeReview={build,answerMatches,normalize};
 })(typeof globalThis!=='undefined'?globalThis:this);
