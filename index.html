@@ -27,6 +27,15 @@
 .cloze-inline-input::placeholder{color:#8da9d1;font-weight:450}
 .cloze-inline.is-correct{background:#e7f4eb;border-color:#9bc9ad}
 .cloze-inline.is-correct .cloze-inline-input{color:#256347;border-bottom-color:#72ab83}
+.cloze-inline.is-minor{background:#fff5d8;border-color:#e9bd55}
+.cloze-inline.is-minor .cloze-inline-input{color:#936619;border-bottom-color:#d6ab4d}
+.cloze-inline-feedback.minor{color:#936619}
+.cloze-inline-diff{display:inline-flex;flex-direction:column;gap:3px;max-width:min(57ch,100%);font-size:11px;line-height:1.55;white-space:normal;overflow-wrap:anywhere;vertical-align:middle}
+.cloze-inline-diff-line{display:block}
+.cloze-inline-diff-label{font-weight:750;opacity:.8}
+.cloze-inline-diff .cloze-diff-word{font-weight:900;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:2px;background:rgba(250,194,76,.26);border-radius:2px}
+.cloze-inline.is-wrong .cloze-inline-diff .cloze-diff-word{background:rgba(219,97,67,.16)}
+.cloze-inline-diff-reason{font-size:10px;opacity:.82;font-weight:650}
 .cloze-inline.is-wrong{background:#fff1ed;border-color:#e7b5a7}
 .cloze-inline.is-wrong .cloze-inline-input{color:#93473c;border-bottom-color:#d69c8e}
 .cloze-inline-input:disabled{opacity:1;cursor:text;-webkit-text-fill-color:currentColor}
@@ -107,7 +116,8 @@
     </section>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="/mistake-review.js"></script>
+  <script src="/cloze-feedback.js"></script>
+<script src="/mistake-review.js"></script>
 <script src="/mistake-review-ui.js"></script>
 <script>
 /* Pure essay exercise generator and exact-word scoring. No remote services needed. */
@@ -336,15 +346,18 @@ function renderCloze(data,p,st){
    const b=c.blanks[part.index-1], r=results?.[b.index-1], v=ses.drafts[b.index-1]||'';
    const baseWidth=Math.min(44,Math.max(9,b.wordCount*5+4));
    const inputWidth=Math.min(52,Math.max(baseWidth,v.length+2));
-   const feedback=r?`<span class="cloze-inline-feedback ${r.exact?'correct':'incorrect'}">${r.exact?'✓':`Original: ${esc(b.expected)}`}</span>`:'';
-   return `<label class="cloze-inline ${r?(r.exact?'is-correct':'is-wrong'):''}" id="gap-${b.index}"><span class="cloze-inline-label">(${b.index}·${b.wordCount})</span><input type="text" class="cloze-input cloze-inline-input" data-gap="${b.index-1}" data-base-width="${baseWidth}" aria-label="Blank ${b.index}: ${b.wordCount} missing words" style="width:${inputWidth}ch" value="${esc(v)}" placeholder="type here" autocomplete="off" autocapitalize="off" spellcheck="false" ${results?'disabled title="Use Redo to start a new attempt"':''}/>${feedback}</label>`;
+   const classification=r&&!r.exact?window.ClozeFeedback?.classify(v,b.expected):null;
+   const isMinor=classification?.kind==='minor';
+   const diff=r&&!r.exact?window.ClozeFeedback?.highlight(v,b.expected):null;
+   const feedback=r?(r.exact?'<span class="cloze-inline-feedback correct">✓</span>':`<span class="cloze-inline-diff" role="status"><span class="cloze-inline-diff-line"><span class="cloze-inline-diff-label">Yours:</span> ${diff?.answer||esc(v)||'—'}</span><span class="cloze-inline-diff-line"><span class="cloze-inline-diff-label">Original:</span> ${diff?.expected||esc(b.expected)}</span><span class="cloze-inline-diff-reason">${isMinor?'Minor — '+esc(classification.reason):'Wording difference · review meaning'}</span></span>`):'';
+   return `<label class="cloze-inline ${r?(r.exact?'is-correct':isMinor?'is-minor':'is-wrong'):''}" id="gap-${b.index}"><span class="cloze-inline-label">(${b.index}·${b.wordCount})</span><input type="text" class="cloze-input cloze-inline-input" data-gap="${b.index-1}" data-base-width="${baseWidth}" aria-label="Blank ${b.index}: ${b.wordCount} missing words" style="width:${inputWidth}ch" value="${esc(v)}" placeholder="type here" autocomplete="off" autocapitalize="off" spellcheck="false" ${results?'disabled title="Use Redo to start a new attempt"':''}/>${feedback}</label>`;
  }).join('');
  const score=results?results.filter(r=>r.exact).length:0;
  const percentage=results?Math.round(100*score/c.blanks.length):0;
  return `<div class="page-actions"><div class="btn-group"><span class="tag">${c.totalWords} words total</span><span class="tag blue">${c.masked} hidden (${Math.round(100*c.masked/c.totalWords)}%)</span></div><span class="tag">${results?'Checked':'Type directly into the passage'}</span></div>
  <div class="eyebrow">COMPLETE THE PASSAGE</div><div class="cloze-passage" aria-label="Fill in each blank directly in the passage">${passage}</div>
  <div class="page-actions" style="margin-top:22px"><div class="footer-hint">Type directly in each blue blank. The label gives the blank number and exact missing word count. Press Tab for the next blank.</div><div class="btn-group"><button class="btn btn-blue" data-action="checkCloze" ${results?'disabled':''}>${icon('check')} ${results?'Attempt checked':'Check all blanks'}</button><button class="btn btn-outline" data-action="redo">${icon('refresh')} Redo</button></div></div>
- ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Correct answers are marked in green. For mistakes, the author's exact wording appears next to the corresponding blank. All deviations count as incorrect for exact reproduction.</p>`:''}${renderHistory(p)}`;
+ ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = capitalization, punctuation, or clearly recognizable spelling differences; red = other wording differences (not automatically a meaning judgment). Changed words are bolded and underlined next to each answer. All non-exact entries still count as incorrect for exact-recall scoring.</p>`:''}${renderHistory(p)}`;
 }
 function renderHistory(p){if(!p.history.length)return `<div class="attempt-panel"><h3>${icon('history')} Attempt history</h3><p style="font-size:11px;color:#8b95a0;margin:0">Complete an exercise to record your score. Redo it later to compare attempts.</p></div>`;
  return `<div class="attempt-panel"><h3>${icon('history')} Previous attempts</h3>${p.history.slice(-7).reverse().map((a,i)=>`<div class="attempt-row"><span>Attempt ${p.history.length-i} · ${formatTime(a.at)} ${a.legacy?'(earlier exercise set)':a.complete?'':'(partial)'}</span><strong>${a.score===null?'Reviewed':a.score+'%'}</strong></div>`).join('')}</div>`;}
