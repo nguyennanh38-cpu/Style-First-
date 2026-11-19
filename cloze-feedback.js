@@ -51,8 +51,8 @@ function classify(answer,expected){
  const lc=s=>s.toLowerCase();
  // Exact word sequence with only capitalization/punctuation/spacing differences.
  if(wa.length===wb.length&&wa.every((w,i)=>cleanWord(w)===cleanWord(wb[i]))){
-  if(a.toLowerCase()===b.toLowerCase())return {kind:"minor",reason:"Punctuation or spacing"};
-  return {kind:"minor",reason:"Capitalization or punctuation"};
+  if(a.toLowerCase()===b.toLowerCase())return {kind:"minor",reason:"Capitalization only"};
+  return {kind:"minor",reason:"Punctuation or spacing"};
  }
  // Common US/UK variants are textually different, but semantically equivalent.
  if(wa.length===wb.length&&wa.some((w,i)=>w.toLowerCase()!==wb[i].toLowerCase())&&
