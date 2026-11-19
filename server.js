@@ -84,7 +84,7 @@ if(await syncRoute(req,res,u.pathname))return;
 if(u.pathname.startsWith('/api/'))return await route(req,res,u.pathname);
 if(req.method!=='GET')return reply(res,405,{error:'Method not allowed'});
 const dest=u.pathname==='/'?'index.html':u.pathname.slice(1);
-const publicTypes={'index.html':'text/html; charset=utf-8','icon.svg':'image/svg+xml; charset=utf-8','manifest.webmanifest':'application/manifest+json; charset=utf-8','sync-client.js':'application/javascript; charset=utf-8'};
+const publicTypes={'index.html':'text/html; charset=utf-8','icon.svg':'image/svg+xml; charset=utf-8','manifest.webmanifest':'application/manifest+json; charset=utf-8','sync-client.js':'application/javascript; charset=utf-8','mistake-review.js':'application/javascript; charset=utf-8','mistake-review-ui.js':'application/javascript; charset=utf-8'};
 if(!Object.prototype.hasOwnProperty.call(publicTypes,dest))return reply(res,404,{error:'Not found'});
 const buf=await fs.readFile(path.join(DIR,dest));
 res.writeHead(200,{'Content-Type':publicTypes[dest],'Cache-Control':dest==='index.html'?'no-cache':'public, max-age=3600','X-Content-Type-Options':'nosniff'});
