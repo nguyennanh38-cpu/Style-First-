@@ -112,6 +112,42 @@ function classify(answer,expected){
  }
  return {kind:"major",reason:"Wording difference (meaning not automatically assessed)"};
 }
+function classifyWithContext(answer,expected,before="",after=""){
+ const direct=classify(answer,expected);
+ if(direct.kind!=="major")return direct;
+ // A learner can unintentionally copy words already visible immediately
+ // before/after the gap. Only strip word-for-word overlaps with that
+ // visible text, and only if the remaining answer is exact or minor.
+ const wordPattern=/[\p{L}\p{N}]+(?:['-][\p{L}\p{N}]+)*/gu;
+ const all=s=>Array.from(normalize(s).matchAll(wordPattern),m=>({
+  key:m[0].toLowerCase(),start:m.index,end:m.index+m[0].length
+ }));
+ const a=normalize(answer),input=all(a);
+ const left=all(before).slice(-3),right=all(after).slice(0,3);
+ if(!input.length)return direct;
+ let best=null;
+ for(let ln=0;ln<=Math.min(3,left.length,input.length);ln++){
+  if(ln&&!input.slice(0,ln).every((x,i)=>x.key===left[left.length-ln+i].key))continue;
+  for(let rn=0;rn<=Math.min(3,right.length,input.length-ln);rn++){
+   if(!ln&&!rn)continue;
+   if(!rn||input.slice(-rn).every((x,i)=>x.key===right[i].key)){
+    const start=ln?input[ln-1].end:0,end=rn?input[input.length-rn].start:a.length;
+    const candidate=a.slice(start,end).trim();
+    if(!candidate)continue;
+    const tested=classify(candidate,expected);
+    if(tested.kind==="major")continue;
+    const penalty=ln+rn;
+    if(!best||penalty<best.penalty||penalty===best.penalty&&tested.kind==="exact"){
+     best={...tested,kind:"minor",reason:tested.kind==="exact"?"Adjacent visible words repeated":tested.reason,
+       comparedAnswer:candidate,overlap:{before:ln,after:rn},penalty};
+    }
+   }
+  }
+ }
+ if(!best)return direct;
+ const {penalty,...result}=best;
+ return result;
+}
 function chunks(s){
  // Preserve whitespace, and keep punctuation attached to visible word tokens.
  return String(s??"").split(/(\s+)/).filter(x=>x.length>0);
@@ -176,5 +212,5 @@ function highlight(answer,expected){
  return {answer:render(users,wrongY),expected:render(originals,wrongX,true),
    differences:wrongX.size+wrongY.size};
 }
-root.ClozeFeedback={classify,highlight,normalize};
+root.ClozeFeedback={classify,classifyWithContext,highlight,normalize};
 })(typeof window!=="undefined"?window:globalThis);
