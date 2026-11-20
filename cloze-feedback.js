@@ -44,6 +44,47 @@ function isLikelyTypo(a,b){
  if((x.endsWith("ed")&&x.slice(0,-2)===y)||(y.endsWith("ed")&&y.slice(0,-2)===x))return false;
  return edits(x,y)===1;
 }
+function coordinatedReorderingOnly(answer,expected){
+ // Treat as minor only an actual AND/OR enumeration with identical whole items.
+ // Arbitrary word permutations and missing/added list items remain non-minor.
+ function positions(s){
+  return Array.from(normalize(s).matchAll(/[\p{L}\p{N}]+(?:['-][\p{L}\p{N}]+)*/gu),m=>({
+   key:cleanWord(m[0]),start:m.index,end:m.index+m[0].length
+  }));
+ }
+ function splitList(s){
+  s=normalize(s).toLowerCase().replace(/,\s*(and|or)\b/g," $1");
+  const links=[...s.matchAll(/\b(and|or)\b/g)].map(m=>m[1]);
+  if(!links.length||links.some(v=>v!==links[0]))return null;
+  const parts=s.split(/\s*(?:,|\b(?:and|or)\b)\s*/).map(p=>p.trim());
+  if(parts.length<2||parts.some(p=>!p))return null;
+  const items=parts.map(p=>tokens(p).map(cleanWord).join(" ")); 
+  if(items.some(x=>!x))return null;
+  return {conjunction:links[0],items};
+ }
+ function permutation(a,b){
+  const x=splitList(a),y=splitList(b);
+  if(!x||!y||x.conjunction!==y.conjunction||x.items.length!==y.items.length)return false;
+  if(x.items.every((v,i)=>v===y.items[i]))return false;
+  const counts=new Map();
+  for(const v of x.items)counts.set(v,(counts.get(v)||0)+1);
+  for(const v of y.items){
+   if(!(counts.get(v)>0))return false;
+   counts.set(v,counts.get(v)-1);
+  }
+  return [...counts.values()].every(v=>v===0);
+ }
+ if(permutation(answer,expected))return true;
+ // Allow the enumeration to be embedded in otherwise identical surrounding text.
+ const a=normalize(answer),b=normalize(expected),aw=positions(a),bw=positions(b);
+ let start=0;
+ while(start<aw.length&&start<bw.length&&aw[start].key===bw[start].key)start++;
+ let aEnd=aw.length,bEnd=bw.length;
+ while(aEnd>start&&bEnd>start&&aw[aEnd-1].key===bw[bEnd-1].key){aEnd--;bEnd--;}
+ if(start>=aEnd||start>=bEnd)return false;
+ return permutation(a.slice(aw[start].start,aw[aEnd-1].end),
+                    b.slice(bw[start].start,bw[bEnd-1].end));
+}
 function classify(answer,expected){
  const a=normalize(answer),b=normalize(expected);
  if(a===b)return {kind:"exact",reason:"Exact match"};
@@ -54,6 +95,7 @@ function classify(answer,expected){
   if(a.toLowerCase()===b.toLowerCase())return {kind:"minor",reason:"Capitalization only"};
   return {kind:"minor",reason:"Punctuation or spacing"};
  }
+ if(coordinatedReorderingOnly(a,b))return {kind:"minor",reason:"List order only"};
  // Common US/UK variants are textually different, but semantically equivalent.
  if(wa.length===wb.length&&wa.some((w,i)=>w.toLowerCase()!==wb[i].toLowerCase())&&
    wa.every((w,i)=>cleanWord(w)===cleanWord(wb[i])||pairs.has(pair(cleanWord(w),cleanWord(wb[i])))))
@@ -92,7 +134,10 @@ function highlight(answer,expected){
  const wrongX=new Set(),wrongY=new Set();
  let i=0,j=0;
  while(i<n||j<m){
-  if(i<n&&j<m&&equal(x[i],y[j])&&dp[i][j]===dp[i+1][j+1]){i++;j++;continue;}
+  if(i<n&&j<m&&equal(x[i],y[j])&&dp[i][j]===dp[i+1][j+1]){
+   if(normalize(x[i])!==normalize(y[j])){wrongX.add(i);wrongY.add(j);}
+   i++;j++;continue;
+  }
   const sub=i<n&&j<m?dp[i+1][j+1]:1e6,del=i<n?dp[i+1][j]:1e6,ins=j<m?dp[i][j+1]:1e6;
   const v=Math.min(sub,del,ins);
   if(v===sub){wrongX.add(i++);wrongY.add(j++);}
