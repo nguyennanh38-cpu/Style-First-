@@ -343,12 +343,15 @@ function renderFeedback(r,task,st,i,n,done){const exact=r.exact;const type=r.pen
 }
 function renderCloze(data,p,st){
  const c=data.cloze,ses=p.session,results=ses.clozeResults;
- const passage=c.parts.map(part=>{
+ const passage=c.parts.map((part,partIndex)=>{
    if(part.type==='text')return esc(part.text);
    const b=c.blanks[part.index-1], r=results?.[b.index-1], v=ses.drafts[b.index-1]||'';
    const baseWidth=Math.min(44,Math.max(9,b.wordCount*5+4));
    const inputWidth=Math.min(52,Math.max(baseWidth,v.length+2));
-   const classification=r&&!r.exact?window.ClozeFeedback?.classify(v,b.expected):null;
+   const precedingPart=c.parts[partIndex-1],followingPart=c.parts[partIndex+1];
+   const before=precedingPart?.type==='text'?precedingPart.text:'';
+   const after=followingPart?.type==='text'?followingPart.text:'';
+   const classification=r&&!r.exact?window.ClozeFeedback?.classifyWithContext(v,b.expected,before,after):null;
    const isMinor=classification?.kind==='minor';
    const diff=r&&!r.exact?window.ClozeFeedback?.highlight(v,b.expected):null;
    const feedback=r?(r.exact?'<span class="cloze-inline-feedback correct">✓</span>':`<span class="cloze-inline-diff" role="status" aria-label="Original author wording">${diff?.expected||esc(b.expected)}</span>`):'';
