@@ -60,7 +60,7 @@ test('missing elements and altered relations are not yellow',()=>{
  ]) assert.equal(classify(student,original).kind,'major',student);
 });
 test('original correction underlines capitalization and reordered list items',()=>{
- assert.match(highlight('Of Art','of Art').expected,/<strong class="cloze-diff-word">of<\/strong>/);
+ assert.match(highlight('Of Art','of Art').expected,/<strong class="cloze-diff-char">o<\/strong>f Art/);
  const r=highlight('learn about culture and history','learn about history and culture');
  assert.match(r.expected,/cloze-diff-word/);
 });
