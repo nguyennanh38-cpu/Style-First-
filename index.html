@@ -54,6 +54,63 @@
 
 .highlight-error{font-weight:850;color:#ac4939;background:rgba(240,152,124,.15);border-radius:2px;padding:0 1px;text-decoration:underline;text-decoration-color:#da9783;text-decoration-thickness:1px;text-underline-offset:3px}
 
+
+/* Parallel reading: maximize study area, keep the original essay independently scrollable. */
+.workspace.reading-layout{grid-template-columns:226px minmax(0,1fr)}
+.workspace.reading-layout .inspector{display:none}
+.workspace.reading-layout .main{padding:24px clamp(18px,2.5vw,38px) 64px}
+.workspace.reading-layout .main-content{max-width:1510px}
+.reader-page-top{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.reader-page-top .page-subtitle{margin-bottom:5px}
+.reading-workspace{display:grid;grid-template-columns:minmax(300px,.96fr) minmax(380px,1.04fr);gap:22px;align-items:start;margin-top:18px}
+.reading-question-pane{min-width:0}
+.reading-question-pane .study-block{padding:clamp(16px,2vw,25px)}
+.reading-question-pane .section-heading{margin-top:0}
+.reading-question-pane .task-question{font-size:16px}
+.reading-source-pane{position:sticky;top:89px;display:flex;flex-direction:column;max-height:calc(100vh - 107px);overflow:hidden;border:1px solid #d8e3e0;border-radius:15px;background:#fff;box-shadow:var(--shadow);min-width:0}
+.reading-pane-top{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:16px 19px 0}
+.reading-essay-title{margin:8px 19px 12px;font-size:19px;letter-spacing:-.55px;line-height:1.3}
+.reading-task-prompt{border-left:3px solid #98b1d3;background:#f3f6fc;padding:10px 12px;margin:0 16px 12px;border-radius:0 7px 7px 0}
+.reading-task-prompt .eyebrow{font-size:9px}
+.reading-task-prompt p{margin:4px 0 0;color:#33445b;font-family:Georgia,"Times New Roman",serif;font-size:12px;line-height:1.65}
+.reading-paragraph-nav{display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin;padding:0 16px 12px;border-bottom:1px solid #eef1f3}
+.reading-jump{background:#f4f7fa;border:1px solid #e2e7ec;border-radius:7px;padding:5px 10px;color:#617184;font-size:10px;font-weight:750;white-space:nowrap}
+.reading-jump:hover,.reading-jump.is-current{background:#e5eefc;border-color:#b8cbe6;color:#26599c}
+.reading-source-scroll{overflow:auto;overscroll-behavior:contain;min-height:0;flex:1;padding:9px 20px 15px;scrollbar-width:thin;outline-offset:-3px}
+.reading-paragraph{padding:13px 10px;border-radius:9px;scroll-margin-top:10px}
+.reading-paragraph+.reading-paragraph{margin-top:4px}
+.reading-paragraph.is-related{background:#f1f6fd;box-shadow:inset 3px 0 #8bb0db}
+.reading-paragraph-number{font-size:9px;letter-spacing:1.2px;color:#8a97a6;font-weight:800}
+.reading-paragraph p{font-family:Georgia,"Times New Roman",serif;color:#303d4a;font-size:15px;line-height:1.95;margin:7px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.reading-source-foot{font-size:10px;color:#8796a1;border-top:1px solid #eef1f3;background:#fcfdfd;padding:9px 17px}
+.reader-page>.reading-source-pane{position:relative;top:auto;max-height:calc(100vh - 240px);min-height:420px;max-width:100%}
+.reader-page .reading-paragraph p{font-size:17px;line-height:2.05}
+.reader-page .reading-source-scroll{padding:14px clamp(22px,4vw,56px) 26px}
+.reading-mobile-tabs{display:none}
+@media(max-width:1000px){
+ .reading-workspace{display:flex;flex-direction:column;gap:12px}
+ .reading-mobile-tabs{display:flex;gap:8px;margin:4px 0 12px}
+ .reading-mobile-tabs button{flex:1;display:flex;justify-content:center;align-items:center;gap:7px;padding:10px 12px;border:1px solid #d4dce8;border-radius:9px;background:#fff;color:#667286;font-size:12px;font-weight:750}
+ .reading-mobile-tabs button.active{background:#e7efff;color:#295caf;border-color:#9bb8ed}
+ .reading-mobile-tabs .lucide{width:15px;height:15px}
+ .reading-workspace .reading-source-pane{position:relative;top:auto;width:100%;max-height:calc(100vh - 220px);min-height:280px}
+ .reading-workspace .reading-question-pane{width:100%}
+ .reading-workspace[data-mobile-view="question"] .reading-source-pane{display:none}
+ .reading-workspace[data-mobile-view="essay"] .reading-question-pane{display:none}
+ .reader-page>.reading-source-pane{max-height:calc(100vh - 235px)}
+}
+@media(max-width:720px){
+ .workspace.reading-layout{display:block}
+ .workspace.reading-layout .main{padding:18px 14px 60px}
+ .reading-workspace .reading-source-pane{max-height:calc(100vh - 210px)}
+ .reader-page>.reading-source-pane{max-height:calc(100vh - 218px)}
+ .reading-paragraph p{font-size:14px}
+ .reading-pane-top{padding:14px 14px 0}
+ .reading-source-scroll{padding:10px 13px 16px}
+ .reader-page .reading-source-scroll{padding:10px 17px 19px}
+ .reader-page .reading-paragraph p{font-size:15px}
+}
+
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -80,6 +137,7 @@
         <div class="sidebar-inner">
           <div class="sidebar-caption">YOUR WORKSPACE</div>
           <button class="nav-home" id="navHome"><span data-icon="grid"></span> Dashboard <span data-icon="chevronRight" class="push-right"></span></button>
+          <button class="nav-home" id="navReader" title="Read the complete model essay"><span data-icon="book"></span> Original essay <span data-icon="chevronRight" class="push-right"></span></button>
           <div class="side-group-heading"><span>ESSAY LIBRARY</span><button class="icon-btn icon-btn-small" id="newEssaySide" aria-label="Add essay"><span data-icon="plus"></span></button></div>
           <div id="librarySide" class="library-side"></div>
           <div class="sidebar-rule"></div>
