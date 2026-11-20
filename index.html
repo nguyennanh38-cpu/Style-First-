@@ -118,7 +118,7 @@
     </section>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="/cloze-feedback.js"></script>
+  <script src="/cloze-feedback.js?v=20261120-case-highlight-2"></script>
 <script src="/mistake-review.js"></script>
 <script src="/mistake-review-ui.js"></script>
 <script>
@@ -419,7 +419,7 @@ function eventBindings(){for(const el of document.querySelectorAll('[data-icon]'
  });
 }
 async function initialize(){db=load();if(!db.selectedId)db.selectedId=db.essays[0]?.id;eventBindings();render();try{const r=await fetch('/api/health');if(r.ok){const d=await r.json();ai.enabled=!!d.ai;ai.model=d.model;ai.accessCodeRequired=!!d.accessCodeRequired;render();}}catch{ /* Standalone HTML continues in offline mode. */ }
- if('serviceWorker'in navigator&&location.protocol!=='file:'&&location.protocol==='https:')navigator.serviceWorker.register('/sw.js').catch(()=>{});
+ if('serviceWorker'in navigator&&location.protocol==='https:')navigator.serviceWorker.getRegistrations().then(regs=>regs.filter(r=>{try{return new URL(r.active?.scriptURL||r.waiting?.scriptURL||r.installing?.scriptURL||'',location.href).pathname==='/sw.js';}catch{return false;}}).forEach(r=>r.unregister())).catch(()=>{});
 }
 initialize();
 
