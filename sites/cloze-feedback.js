@@ -116,6 +116,22 @@ function chunks(s){
  // Preserve whitespace, and keep punctuation attached to visible word tokens.
  return String(s??"").split(/(\s+)/).filter(x=>x.length>0);
 }
+function highlightCaseCharacters(reference,learner){
+ // When the only difference within a token is case, isolate individual letters:
+ // "internet" vs "Internet" highlights "I", not the whole word.
+ const original=Array.from(String(reference)),typed=Array.from(String(learner));
+ if(original.length!==typed.length||
+    normalize(reference).toLowerCase()!==normalize(learner).toLowerCase()||
+    normalize(reference)===normalize(learner))return null;
+ let changed=false;
+ const html=original.map((char,i)=>{
+  if(char===typed[i])return safe(char);
+  if(normalize(char).toLowerCase()!==normalize(typed[i]).toLowerCase())return null;
+  changed=true;
+  return '<strong class="cloze-diff-char">'+safe(char)+'</strong>';
+ });
+ return changed&&html.every(part=>part!==null)?html.join(''):null;
+}
 function highlight(answer,expected){
  const originals=chunks(expected),users=chunks(answer);
  const x=originals.filter(t=>t.trim()),y=users.filter(t=>t.trim());
@@ -131,11 +147,11 @@ function highlight(answer,expected){
   else if(equal(x[i],y[j]))dp[i][j]=dp[i+1][j+1];
   else dp[i][j]=1+Math.min(dp[i+1][j+1],dp[i+1][j],dp[i][j+1]);
  }
- const wrongX=new Set(),wrongY=new Set();
+ const wrongX=new Set(),wrongY=new Set(),matchedPairs=new Map();
  let i=0,j=0;
  while(i<n||j<m){
   if(i<n&&j<m&&equal(x[i],y[j])&&dp[i][j]===dp[i+1][j+1]){
-   if(normalize(x[i])!==normalize(y[j])){wrongX.add(i);wrongY.add(j);}
+   if(normalize(x[i])!==normalize(y[j])){wrongX.add(i);wrongY.add(j);matchedPairs.set(i,j);}
    i++;j++;continue;
   }
   const sub=i<n&&j<m?dp[i+1][j+1]:1e6,del=i<n?dp[i+1][j]:1e6,ins=j<m?dp[i][j+1]:1e6;
@@ -144,15 +160,20 @@ function highlight(answer,expected){
   else if(v===del)wrongX.add(i++);
   else wrongY.add(j++);
  }
- const render=(source,bad)=>{
+ const render=(source,bad,reference=false)=>{
   let k=0;
   return source.map(t=>{
    if(!t.trim())return safe(t);
-   const flagged=bad.has(k++);
-   return flagged?'<strong class="cloze-diff-word">'+safe(t)+'</strong>':safe(t);
+   const idx=k++;
+   if(!bad.has(idx))return safe(t);
+   if(reference&&matchedPairs.has(idx)){
+    const precise=highlightCaseCharacters(t,y[matchedPairs.get(idx)]);
+    if(precise)return precise;
+   }
+   return '<strong class="cloze-diff-word">'+safe(t)+'</strong>';
   }).join('');
  };
- return {answer:render(users,wrongY),expected:render(originals,wrongX),
+ return {answer:render(users,wrongY),expected:render(originals,wrongX,true),
    differences:wrongX.size+wrongY.size};
 }
 root.ClozeFeedback={classify,highlight,normalize};
