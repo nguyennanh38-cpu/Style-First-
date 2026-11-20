@@ -87,7 +87,7 @@ const dest=u.pathname==='/'?'index.html':u.pathname.slice(1);
 const publicTypes={'index.html':'text/html; charset=utf-8','icon.svg':'image/svg+xml; charset=utf-8','manifest.webmanifest':'application/manifest+json; charset=utf-8','sync-client.js':'application/javascript; charset=utf-8','mistake-review.js':'application/javascript; charset=utf-8','mistake-review-ui.js':'application/javascript; charset=utf-8','cloze-feedback.js':'application/javascript; charset=utf-8'};
 if(!Object.prototype.hasOwnProperty.call(publicTypes,dest))return reply(res,404,{error:'Not found'});
 const buf=await fs.readFile(path.join(DIR,dest));
-res.writeHead(200,{'Content-Type':publicTypes[dest],'Cache-Control':dest==='index.html'?'no-cache':'public, max-age=3600','X-Content-Type-Options':'nosniff'});
+res.writeHead(200,{'Content-Type':publicTypes[dest],'Cache-Control':'no-store, max-age=0, must-revalidate','X-Content-Type-Options':'nosniff'});
 res.end(buf);
 }catch(e){reply(res,e.status||500,{error:e.message||'Unexpected server error'});}});
 server.listen(PORT,'0.0.0.0',()=>console.log('Style First ready on '+PORT+' ('+(HAS_AI?'AI':'no AI')+')'));
