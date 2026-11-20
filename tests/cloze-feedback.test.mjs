@@ -40,7 +40,9 @@ test('inserted and omitted words are highlighted correctly',()=>{
 test('markup in answers is HTML escaped',()=>{
  const r=highlight('<img onerror=alert(1)>','actual answer');
  assert.doesNotMatch(r.answer,/<img/);
- assert.match(r.answer,/&lt;img/);
+ assert.match(r.answer,/&lt;/);
+ assert.match(r.answer,/&gt;/);
+ assert.match(r.answer,/<strong class="cloze-diff-word">img<\/strong>/);
 });
 
 test('reordering intact coordination is yellow',()=>{
