@@ -366,7 +366,12 @@ function renderStage(){const e=selected(),st=STAGES.find(x=>x.id===stageId)||STA
  if(assist)headerHtml+=`<div class="notice">${st.id==='1'?'Analytical answers need AI for a trustworthy score. Without it, you can review the reference evidence, but no correctness claim is made.':'This essay is using an offline fallback for this stage. For faithful paraphrase and Vietnamese translation prompts, generate an AI-enhanced exercise set.'}${ai.enabled&&!e.plan?' <button class="sample-link" data-action="enhanceAI">Enable AI enrichment</button>':''}</div>`;
  if(!n)return headerHtml+`<div class="empty-state">${icon('info')}<h3>No reliable questions could be generated</h3><p>We avoid inventing answer phrases that do not actually appear in the original essay. Try AI enhancement.</p></div>`;
  if(data.cloze)return headerHtml+renderCloze(data,p,st);
- return headerHtml+renderTask(data,p,st,at)+renderHistory(p);
+ if(['1','2'].includes(st.id)){
+   const found=(data.tasks[at]?.prompt||'').match(/paragraph\s+(\d+)/i);
+   const focused=st.id==='1'&&found?Number(found[1]):null;
+   return headerHtml+readingMobileTabs()+'<div class="reading-workspace" data-mobile-view="'+readingMobileView+'">'+readingSourcePanel(e,focused)+'<div class="reading-question-pane">'+renderTask(data,p,st,at)+renderHistory(p)+'</div></div>';
+  }
+  return headerHtml+renderTask(data,p,st,at)+renderHistory(p);
 }
 
 function readingSourcePanel(e,focusedParagraph=null){
