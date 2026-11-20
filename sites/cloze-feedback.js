@@ -169,48 +169,79 @@ function highlightCaseCharacters(reference,learner){
  return changed&&html.every(part=>part!==null)?html.join(''):null;
 }
 function highlight(answer,expected){
- const originals=chunks(expected),users=chunks(answer);
- const x=originals.filter(t=>t.trim()),y=users.filter(t=>t.trim());
- if(x.length*y.length>50000)return {answer:safe(answer),expected:safe(expected)};
- const n=x.length,m=y.length;
+ // Align words independently of punctuation. Never flag an otherwise correct
+ // word just because the user added, removed or moved punctuation beside it.
+ const original=String(expected??''),input=String(answer??'');
+ const re=/[\p{L}\p{N}]+(?:['’ʼ\u2010-\u2015-][\p{L}\p{N}]+)*/gu;
+ const extract=text=>Array.from(text.matchAll(re),m=>({
+  value:m[0],start:m.index,end:m.index+m[0].length,
+  key:normalize(m[0]).toLowerCase()
+ }));
+ const a=extract(original),b=extract(input),n=a.length,m=b.length;
+ if(n*m>50000)return {expected:safe(original),answer:safe(input)};
  const dp=Array.from({length:n+1},()=>new Uint16Array(m+1));
- const equal=(a,b)=>normalize(a).toLowerCase()===normalize(b).toLowerCase();
- // Dynamic edit-distance alignment: inserted words are marked in the learner response,
- // omitted words are marked in the original.
  for(let i=n;i>=0;i--)for(let j=m;j>=0;j--){
   if(i===n)dp[i][j]=m-j;
   else if(j===m)dp[i][j]=n-i;
-  else if(equal(x[i],y[j]))dp[i][j]=dp[i+1][j+1];
+  else if(a[i].key===b[j].key)dp[i][j]=dp[i+1][j+1];
   else dp[i][j]=1+Math.min(dp[i+1][j+1],dp[i+1][j],dp[i][j+1]);
  }
- const wrongX=new Set(),wrongY=new Set(),matchedPairs=new Map();
- let i=0,j=0;
- while(i<n||j<m){
-  if(i<n&&j<m&&equal(x[i],y[j])&&dp[i][j]===dp[i+1][j+1]){
-   if(normalize(x[i])!==normalize(y[j])){wrongX.add(i);wrongY.add(j);matchedPairs.set(i,j);}
-   i++;j++;continue;
+ const linksA=new Map(),linksB=new Map();
+ for(let i=0,j=0;i<n||j<m;){
+  if(i<n&&j<m&&a[i].key===b[j].key&&dp[i][j]===dp[i+1][j+1]){
+   linksA.set(i,j);linksB.set(j,i);i++;j++;continue;
   }
-  const sub=i<n&&j<m?dp[i+1][j+1]:1e6,del=i<n?dp[i+1][j]:1e6,ins=j<m?dp[i][j+1]:1e6;
-  const v=Math.min(sub,del,ins);
-  if(v===sub){wrongX.add(i++);wrongY.add(j++);}
-  else if(v===del)wrongX.add(i++);
-  else wrongY.add(j++);
+  const sub=i<n&&j<m?dp[i+1][j+1]:1e6;
+  const deletion=i<n?dp[i+1][j]:1e6;
+  const insertion=j<m?dp[i][j+1]:1e6;
+  const best=Math.min(sub,deletion,insertion);
+  if(best===sub){i++;j++;}
+  else if(best===deletion)i++;
+  else j++;
  }
- const render=(source,bad,reference=false)=>{
-  let k=0;
-  return source.map(t=>{
-   if(!t.trim())return safe(t);
-   const idx=k++;
-   if(!bad.has(idx))return safe(t);
-   if(reference&&matchedPairs.has(idx)){
-    const precise=highlightCaseCharacters(t,y[matchedPairs.get(idx)]);
-    if(precise)return precise;
-   }
-   return '<strong class="cloze-diff-word">'+safe(t)+'</strong>';
+ function punctuation(gap,comparison){
+  if(comparison===null)return safe(gap);
+  const normalized=s=>normalize(s).replace(/\s+/g,'');
+  if(normalized(gap)===normalized(comparison))return safe(gap);
+  const left=Array.from(normalized(comparison));
+  return Array.from(gap).map(ch=>{
+   if(/\s/u.test(ch))return safe(ch);
+   const at=left.indexOf(normalize(ch));
+   if(at>=0){left.splice(at,1);return safe(ch);}
+   return '<strong class="cloze-diff-char">'+safe(ch)+'</strong>';
   }).join('');
+ }
+ function render(text,words,links,peer,peerWords){
+  let output='',cursor=0;
+  for(let i=0;i<=words.length;i++){
+   const next=i<words.length?words[i].start:text.length;
+   const gap=text.slice(cursor,next);
+   let otherGap=null;
+   if(i===0){
+    if(words.length===0&&peerWords.length===0)otherGap=peer;
+    else if(links.get(0)===0)otherGap=peer.slice(0,peerWords[0].start);
+   }else if(i===words.length){
+    const j=links.get(i-1);
+    if(j===peerWords.length-1)otherGap=peer.slice(peerWords[j].end);
+   }else{
+    const prev=links.get(i-1),nextLink=links.get(i);
+    if(prev!==undefined&&nextLink===prev+1)
+     otherGap=peer.slice(peerWords[prev].end,peerWords[nextLink].start);
+   }
+   output+=punctuation(gap,otherGap);
+   if(i===words.length)break;
+   const word=words[i],match=links.get(i);
+   if(match===undefined)output+='<strong class="cloze-diff-word">'+safe(word.value)+'</strong>';
+   else output+=highlightCaseCharacters(word.value,peerWords[match].value)||safe(word.value);
+   cursor=word.end;
+  }
+  return output;
+ }
+ return {
+  expected:render(original,a,linksA,input,b),
+  answer:render(input,b,linksB,original,a),
+  differences:(n-linksA.size)+(m-linksB.size)
  };
- return {answer:render(users,wrongY),expected:render(originals,wrongX,true),
-   differences:wrongX.size+wrongY.size};
 }
 root.ClozeFeedback={classify,classifyWithContext,highlight,normalize};
 })(typeof window!=="undefined"?window:globalThis);
