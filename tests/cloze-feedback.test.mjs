@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import '../cloze-feedback.js';
-const {classify,highlight}=globalThis.ClozeFeedback;
+const {classify,classifyWithContext,highlight}=globalThis.ClozeFeedback;
 test('punctuation-only differences are minor (yellow)',()=>{
  assert.equal(classify('provincial ones are','provincial ones, are').kind,'minor');
  assert.equal(classify('ones are','ones, are').reason,'Punctuation or spacing');
@@ -78,4 +78,24 @@ test('Reordered list words remain highlighted',()=>{
  const r=highlight('culture and history','history and culture');
  assert.match(r.expected,/<strong class="cloze-diff-word">history<\/strong>/);
  assert.match(r.expected,/<strong class="cloze-diff-word">culture<\/strong>/);
+});
+
+test('A reordered list with duplicated visible trailing word is minor (yellow)',()=>{
+ const expected='experience culture and history, it';
+ const typed='experience history and culture, it seems';
+ const c=classifyWithContext(typed,expected,'',' seems logical to reevaluate');
+ assert.equal(classify(typed,expected).kind,'major');
+ assert.equal(c.kind,'minor');
+ assert.equal(c.comparedAnswer,'experience history and culture, it');
+ assert.equal(c.overlap.after,1);
+});
+test('A repeated boundary word is minor only if remaining content is exact or minor',()=>{
+ assert.equal(classifyWithContext('learn about museums museums','learn about museums','',' museums are important').kind,'minor');
+ assert.equal(classifyWithContext('experience history and it seems','experience culture and history, it','',' seems logical').kind,'major');
+ assert.equal(classifyWithContext('experience history and culture, it seems','experience culture and history, it','',' is logical').kind,'major');
+ assert.equal(classifyWithContext('experience history and culture, they seems','experience culture and history, it','',' seems logical').kind,'major');
+});
+test('Same words in new order are still yellow without boundary repeats',()=>{
+ assert.equal(classifyWithContext('B and C and A','A and B and C','','').kind,'minor');
+ assert.equal(classifyWithContext('B and C','A and B and C','','').kind,'major');
 });
