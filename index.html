@@ -367,6 +367,23 @@ function renderStage(){const e=selected(),st=STAGES.find(x=>x.id===stageId)||STA
  if(data.cloze)return headerHtml+renderCloze(data,p,st);
  return headerHtml+renderTask(data,p,st,at)+renderHistory(p);
 }
+
+function readingSourcePanel(e,focusedParagraph=null){
+ const paragraphs=splitEssay(e.essay).paragraphs;
+ const nav=paragraphs.map((p,i)=>'<button type="button" class="reading-jump '+(focusedParagraph===i+1?'is-current':'')+'" data-action="jumpSourceParagraph" data-id="'+(i+1)+'" aria-label="Go to paragraph '+(i+1)+'">P'+(i+1)+'</button>').join('');
+ const content=paragraphs.map((p,i)=>'<section class="reading-paragraph '+(focusedParagraph===i+1?'is-related':'')+'" id="sourceParagraph-'+(i+1)+'"><span class="reading-paragraph-number">PARAGRAPH '+(i+1)+'</span><p>'+esc(p)+'</p></section>').join('');
+ return '<aside class="reading-source-pane" aria-label="Original full essay"><div class="reading-pane-top"><div class="eyebrow">ORIGINAL MODEL ESSAY</div><span class="tag">'+wordCount(e.essay)+' words</span></div><h2 class="reading-essay-title">'+esc(e.title)+'</h2>'+
+ (e.question?'<div class="reading-task-prompt"><span class="eyebrow">IELTS QUESTION</span><p>'+esc(e.question)+'</p></div>':'')+
+ '<div class="reading-paragraph-nav" aria-label="Jump to essay paragraph">'+nav+'</div><div class="reading-source-scroll" id="readingSourceScroll" tabindex="0" aria-label="Scroll original essay independently">'+content+'</div><div class="reading-source-foot">Full original essay · Scroll here independently from the questions.</div></aside>';
+}
+function readingMobileTabs(){
+ return '<div class="reading-mobile-tabs" aria-label="Switch between essay and exercise"><button type="button" data-action="readingMobileView" data-id="question" aria-pressed="'+(readingMobileView==='question')+'" class="'+(readingMobileView==='question'?'active':'')+'">'+icon('edit')+' Questions &amp; answers</button><button type="button" data-action="readingMobileView" data-id="essay" aria-pressed="'+(readingMobileView==='essay')+'" class="'+(readingMobileView==='essay'?'active':'')+'">'+icon('book')+' Original essay</button></div>';
+}
+function renderReader(){
+ const e=selected();if(!e)return renderDashboard();
+ return '<div class="reader-page"><div class="page-kicker"><button class="sample-link" data-action="overview">'+esc(e.title)+'</button><span class="dot"></span> ORIGINAL ESSAY</div><div class="reader-page-top"><div><h1 class="page-title">Read the original essay</h1><p class="page-subtitle">The complete model essay, available whenever you need to revisit its reasoning or wording.</p></div><div class="btn-group"><button class="btn btn-outline" data-action="backFromReader">'+icon('chevronLeft')+' Back to '+(readerReturn==='stage'?'exercise':'overview')+'</button><button class="btn btn-dark" data-action="stage" data-id="'+stageId+'">'+icon('edit')+' '+(readerReturn==='stage'?'Resume exercise':'Start practice')+'</button></div></div>'+readingSourcePanel(e)+'</div>';
+}
+
 function renderTask(data,p,st,i){const task=data.tasks[i],ses=p.session,result=ses.results[i],answer=ses.drafts[i]||'',done=Object.keys(ses.results).length===data.tasks.length;
  const q=task.prompt,context=task.context||'';let readonly='';
  let dots=`<div class="task-progress-dots">${data.tasks.map((_,j)=>`<button aria-label="Go to task ${j+1}" title="Task ${j+1}" data-action="task" data-id="${j}" class="${i===j?'active':ses.results[j]?(ses.results[j].exact?'done':'missed'):''}"></button>`).join('')}</div>`;
