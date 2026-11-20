@@ -64,3 +64,18 @@ test('original correction underlines capitalization and reordered list items',()
  const r=highlight('learn about culture and history','learn about history and culture');
  assert.match(r.expected,/cloze-diff-word/);
 });
+
+test('Only the mismatched capital I is bold and highlighted in a cloze original',()=>{
+ const r=highlight('via the internet, which is why','via the Internet, which is why');
+ assert.match(r.expected,/via the <strong class="cloze-diff-char">I<\/strong>nternet, which is why/);
+ assert.doesNotMatch(r.expected,/cloze-diff-word.*Internet/);
+});
+test('Only the mismatched lowercase o in of Art is emphasized',()=>{
+ const r=highlight('Of Art','of Art');
+ assert.match(r.expected,/<strong class="cloze-diff-char">o<\/strong>f Art/);
+});
+test('Reordered list words remain highlighted',()=>{
+ const r=highlight('culture and history','history and culture');
+ assert.match(r.expected,/<strong class="cloze-diff-word">history<\/strong>/);
+ assert.match(r.expected,/<strong class="cloze-diff-word">culture<\/strong>/);
+});
