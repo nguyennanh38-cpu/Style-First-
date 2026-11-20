@@ -99,3 +99,21 @@ test('Same words in new order are still yellow without boundary repeats',()=>{
  assert.equal(classifyWithContext('B and C and A','A and B and C','','').kind,'minor');
  assert.equal(classifyWithContext('B and C','A and B and C','','').kind,'major');
 });
+
+test('Correct word ones is never marked when only its following comma differs',()=>{
+ const r=highlight('museums, especially small, provincial ones,','museums, particularly small, provincial ones');
+ assert.match(r.expected,/<strong class="cloze-diff-word">particularly<\/strong>/);
+ assert.doesNotMatch(r.expected,/<strong[^>]*>ones/);
+ assert.doesNotMatch(r.answer,/<strong class="cloze-diff-word">ones/);
+ assert.match(r.answer,/ones<strong class="cloze-diff-char">,<\/strong>/);
+});
+test('Missing comma highlights punctuation alone, not adjacent correct word',()=>{
+ const r=highlight('museums particularly small provincial ones','museums, particularly small, provincial ones');
+ assert.doesNotMatch(r.expected,/<strong class="cloze-diff-word">(?:museums|small|ones)/);
+ assert.match(r.expected,/museums<strong class="cloze-diff-char">,<\/strong>/);
+});
+test('Correct word stays unchanged when comma is present only in original',()=>{
+ const r=highlight('provincial ones','provincial ones,');
+ assert.equal(r.expected,'provincial ones<strong class="cloze-diff-char">,</strong>');
+ assert.equal(r.answer,'provincial ones');
+});
