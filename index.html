@@ -114,6 +114,43 @@
  .reader-page .reading-paragraph p{font-size:15px}
 }
 
+
+/* Stage 01: user-authored argument analysis, always available without AI. */
+.argument-mode-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 12px}
+.argument-mode-tabs button{border:1px solid #ced8e5;background:#fff;color:#526579;font-weight:750;font-size:12px;border-radius:9px;padding:11px 14px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.argument-mode-tabs button.active{background:#e9f1fc;color:#215796;border-color:#9cb9db;box-shadow:inset 0 -2px #4b81c3}
+.argument-mode-tabs button:not(.active):hover{background:#f5f8fb}
+.argument-mode-tabs button span.step-label{font-size:10px;font-weight:850;color:#738bb0}
+.argument-workbook{display:flex;flex-direction:column;max-height:calc(100vh - 107px);min-height:280px;overflow:hidden;background:#fff;border:1px solid #dbe3ed;border-radius:15px;box-shadow:var(--shadow)}
+.reading-question-pane:has(.argument-workbook){position:sticky;top:89px}
+.argument-workbook-body{overflow:auto;min-height:0;flex:1;padding:18px 20px 25px;overscroll-behavior:contain;scrollbar-width:thin}
+.argument-heading{display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap}
+.argument-heading h2{font-size:19px;letter-spacing:-.5px;line-height:1.3;margin:7px 0}
+.argument-saved-status{font-size:10px;color:#64856e;background:#ecf6ed;border:1px solid #d3e8d5;padding:7px 9px;border-radius:15px}
+.argument-instructions{font-size:12px;line-height:1.8;color:#5c6c7e;margin:7px 0 20px}
+.argument-field{display:block;margin:18px 0}
+.argument-field-label{display:block;font-size:12px;font-weight:800;color:#28384f;margin-bottom:5px}
+.argument-field-tip{display:block;font-size:11px;color:#788797;line-height:1.6;margin-bottom:8px}
+.argument-textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:68px;border:1px solid #cbd9e9;background:#f7faff;border-radius:9px;padding:12px 13px;font-size:13px;font-family:inherit;color:#284e89;line-height:1.7;outline:none}
+.argument-textarea:focus{border-color:#6a9bd4;box-shadow:0 0 0 3px rgba(74,131,207,.12)}
+.argument-map-header{border-top:1px solid #e8edf3;padding-top:18px;margin-top:18px}
+.argument-map-header h3{font-size:15px;margin:0 0 6px}
+.argument-map-header p{color:#7a8999;font-size:11px;line-height:1.7;margin:0}
+.argument-map-entry{border:1px solid #e1e9f3;border-radius:11px;background:#fbfcff;margin-top:14px;padding:13px 15px}
+.argument-map-entry .argument-field{margin:11px 0}
+.argument-map-index{display:flex;justify-content:space-between;align-items:center;gap:9px;border-bottom:1px solid #e8edf3;padding-bottom:9px}
+.argument-map-index strong{font-size:10px;letter-spacing:1px;color:#607991}
+.argument-read-link{background:transparent;border:0;color:#2d69b5;font-size:11px;font-weight:750;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.argument-paragraph-nav{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}
+.argument-paragraph-tab{border:1px solid #d0dceb;background:#f7f9fc;border-radius:8px;padding:7px 11px;font-size:12px;font-weight:800;color:#728197;cursor:pointer}
+.argument-paragraph-tab.active{background:#2864ad;border-color:#2864ad;color:#fff}
+.argument-selected{font-size:11px;color:#687d95;font-weight:750;margin:5px 0 18px}
+.argument-paragraph-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin:24px 0 0}
+.argument-paragraph-footer span{font-weight:750;color:#61758b;font-size:11px}
+.argument-workbook-foot{border-top:1px solid #ebeff4;background:#f9fbfd;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 17px;color:#708396;font-size:10px}
+@media(max-width:1000px){.reading-question-pane:has(.argument-workbook){position:relative;top:auto}.argument-workbook{max-height:calc(100vh - 230px);min-height:380px}}
+@media(max-width:720px){.argument-mode-tabs{gap:6px}.argument-mode-tabs button{padding:10px 8px;font-size:11px}.argument-workbook{max-height:calc(100vh - 240px)}.argument-workbook-body{padding:15px}.argument-workbook-foot{font-size:10px}}
+
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -179,7 +216,8 @@
     </section>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
-  <script src="/cloze-feedback.js?v=20261120-case-highlight-2"></script>
+  <script src="/argument-workbook.js"></script>
+<script src="/cloze-feedback.js?v=20261120-case-highlight-2"></script>
 <script src="/mistake-review.js"></script>
 <script src="/mistake-review-ui.js"></script>
 <script>
@@ -341,6 +379,7 @@ const money=number=>Math.round(number*10)/10;
 const D=(id)=>document.getElementById(id);
 let db,mode='dashboard',stageId='1',editing=false,showSource=false,ai={enabled:false,accessCodeRequired:false},busy=false,toastTimer=null;
 let readerReturn='overview',readingMobileView='question',stageSourceTop=0,readerSourceTop=0;
+let argumentView='whole',argumentParagraphIndex=0;
 function fresh(){return {version:1,deletedIds:[],essays:[{id:'demo-household',title:SAMPLE_TITLE,question:SAMPLE_QUESTION,essay:SAMPLE_ESSAY,plan:null,createdAt:new Date().toISOString(),progress:{},demo:true}],selectedId:'demo-household',accessCode:''};}
 function load(){try {const d=JSON.parse(localStorage.getItem(STORAGE));if(d?.version===1&&Array.isArray(d.essays)){d.deletedIds ||= [];return d;}}catch{}return fresh();}
 function save(){try{if(mode==='stage'&&db.essays?.length){const e=selected(),session=e?.progress?.[stageId]?.session;if(session)session.updatedAt=new Date().toISOString();}localStorage.setItem(STORAGE,JSON.stringify(db));window.styleSync?.changed?.();}catch{toast('Browser storage is unavailable or full. Export your progress as a backup.');}}
