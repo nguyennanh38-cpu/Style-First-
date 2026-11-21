@@ -45,7 +45,7 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.doesNotMatch(view,/automatic correctness score:<\/strong>/);
   assert.match(html,/data-action="reader"/);
  });
- test(path+': Stage 1 switches to paragraph logic and retains older questions separately',()=>{
+ test(path+': Stage 1 contains only the two permanent analysis frameworks',()=>{
   const {run}=appFrom(path);
   const para=run("db=fresh();mode='stage';stageId='1';argumentView='paragraph';argumentParagraphIndex=2;renderStage()");
   assert.match(para,/PARAGRAPH LOGIC/);
@@ -54,9 +54,12 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.match(para,/Exact textual evidence/);
   assert.match(para,/Why one step leads to the next/);
   assert.match(para,/data-action="argumentSelectParagraph"/);
-  const older=run("argumentView='questions';renderStage()");
-  assert.match(older,/In paragraph 1/);
-  assert.match(older,/id="answerArea"/);
+  assert.doesNotMatch(para,/Existing analysis questions/);
+  assert.doesNotMatch(para,/id="answerArea"/);
+  const fallback=run("argumentView='questions';renderStage()");
+  assert.match(fallback,/WHOLE-ESSAY LOGIC/);
+  assert.doesNotMatch(fallback,/Existing analysis questions/);
+  assert.doesNotMatch(fallback,/id="answerArea"/);
  });
  test(path+': workbook notes persist independently of stage one redo',()=>{
   const {run}=appFrom(path);
