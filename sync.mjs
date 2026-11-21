@@ -98,6 +98,17 @@ function combineSessions(a,b,archive){
   }
   return preferred;
 }
+function mergeArgumentWorkbook(a,b){
+ // Preserve existing handwritten analysis when progress is merged from two
+ // devices. Never infer text, replace it with generated reasoning, or discard
+ // non-empty fields simply because the other browser has no entry for them.
+ const left=a&&typeof a==='object'?a:{},right=b&&typeof b==='object'?b:{};
+ const first=(Date.parse(left.updatedAt||'')||0)<=(Date.parse(right.updatedAt||'')||0)?left:right;
+ const second=first===left?right:left;
+ const drafts={...((first.drafts&&typeof first.drafts==='object')?first.drafts:{})};
+ for(const [k,v]of Object.entries(second.drafts||{}))if(typeof v==='string')drafts[k]=v;
+ return {drafts,updatedAt:(Date.parse(left.updatedAt||'')||0)>(Date.parse(right.updatedAt||'')||0)?left.updatedAt||null:right.updatedAt||null};
+}
 function mergeProgress(a={},b={}){
   const out={};
   for(const stage of new Set([...Object.keys(a||{}),...Object.keys(b||{})])){
@@ -113,7 +124,7 @@ function mergeProgress(a={},b={}){
     const archMap=new Map(archives.map(x=>[x.id,x]));
     const archive=[...archMap.values()];
     const session=combineSessions(left.session,right.session,archive);
-    out[stage]={history:[...unique.values()].sort((x,y)=>(Date.parse(x.at||'')||0)-(Date.parse(y.at||'')||0)).slice(-1500),session,sessionBackups:archive.slice(-20)};
+    out[stage]={history:[...unique.values()].sort((x,y)=>(Date.parse(x.at||'')||0)-(Date.parse(y.at||'')||0)).slice(-1500),session,sessionBackups:archive.slice(-20),...(stage==='1'&&(left.argumentWorkbook||right.argumentWorkbook)?{argumentWorkbook:mergeArgumentWorkbook(left.argumentWorkbook,right.argumentWorkbook)}:{})};
   }
   return out;
 }
