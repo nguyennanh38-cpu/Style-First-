@@ -30,36 +30,47 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.match(view,/the varying demands of each partner/);
   assert.match(view,/IELTS QUESTION/);
  });
- test(path+': Stage 1 begins with a permanent offline whole-essay framework',()=>{
+ test(path+': Stage 1 is a single notebook containing the overall argument and all paragraphs',()=>{
   const {html,run}=appFrom(path);
-  const view=run("db=fresh();mode='stage';stageId='1';argumentView='whole';renderStage()");
-  assert.match(view,/class="reading-workspace"/);
+  const view=run("db=fresh();mode='stage';stageId='1';renderStage()");
+  assert.match(view,/class="reading-workspace argument-reading-workspace"/);
   assert.match(view,/id="readingSourceScroll"/);
-  assert.match(view,/WHOLE-ESSAY LOGIC/);
-  assert.match(view,/writer’s overall position/);
-  assert.match(view,/Paragraph-by-paragraph argument map/);
-  assert.match(view,/How this paragraph advances the overall position/);
+  assert.match(view,/THE WHOLE ESSAY/);
   assert.match(view,/data-argument-field="whole.stance"/);
-  assert.match(view,/data-argument-field="map.0.main"/);
-  assert.match(view,/data-argument-field="map.4.contribution"/);
-  assert.doesNotMatch(view,/automatic correctness score:<\/strong>/);
-  assert.match(html,/data-action="reader"/);
+  assert.match(view,/id="argumentCard-0"/);
+  assert.match(view,/id="argumentCard-4"/);
+  assert.match(view,/data-argument-field="paragraph.0.purpose"/);
+  assert.match(view,/data-argument-field="paragraph.1.steps"/);
+  assert.match(view,/data-argument-field="paragraph.4.steps"/);
+  assert.match(view,/data-argument-field="insights.global"/);
+  assert.match(view,/Interesting insights &amp; patterns/);
+  assert.doesNotMatch(view,/argument-mode-tabs|data-action="argumentView"|Existing analysis questions/);
+  assert.doesNotMatch(view,/data-argument-field="paragraph.1.evidence"/);
+  assert.match(html,/\.argument-insights-dock\{/);
+  assert.match(html,/\.argument-unified\{height:calc\(100vh/);
  });
- test(path+': Stage 1 contains only the two permanent analysis frameworks',()=>{
+ test(path+': previously saved paragraph work survives the simplified view',()=>{
   const {run}=appFrom(path);
-  const para=run("db=fresh();mode='stage';stageId='1';argumentView='paragraph';argumentParagraphIndex=2;renderStage()");
-  assert.match(para,/PARAGRAPH LOGIC/);
-  assert.match(para,/data-argument-field="paragraph.2.steps"/);
-  assert.match(para,/Actual sequence of ideas/);
-  assert.match(para,/Exact textual evidence/);
-  assert.match(para,/Why one step leads to the next/);
-  assert.match(para,/data-action="argumentSelectParagraph"/);
-  assert.doesNotMatch(para,/Existing analysis questions/);
-  assert.doesNotMatch(para,/id="answerArea"/);
-  const fallback=run("argumentView='questions';renderStage()");
-  assert.match(fallback,/WHOLE-ESSAY LOGIC/);
-  assert.doesNotMatch(fallback,/Existing analysis questions/);
-  assert.doesNotMatch(fallback,/id="answerArea"/);
+  const data=run("db=fresh();mode='stage';stageId='1';const e=selected();const d=argumentWorkbookData(e).drafts;d['paragraph.0.purpose']='Intro purpose';d['paragraph.1.steps']='First -> second';d['paragraph.2.evidence']='Old citation';d['map.1.main']='Saved topic';d['whole.nuance']='A qualification';d['insights.global']='Repeated concession pattern';renderStage()");
+  assert.match(data,/Intro purpose/);
+  assert.match(data,/First -&gt; second/);
+  assert.match(data,/Old citation/);
+  assert.match(data,/Saved topic/);
+  assert.match(data,/A qualification/);
+  assert.match(data,/Repeated concession pattern/);
+  assert.match(data,/data-argument-field="paragraph.2.evidence"/);
+  assert.match(data,/data-argument-field="map.1.main"/);
+  assert.doesNotMatch(data,/data-action="argumentSelectParagraph"/);
+ });
+ test(path+': whole essay and all notes stay accessible in one view',()=>{
+  const {run}=appFrom(path);
+  const view=run("db=fresh();mode='stage';stageId='1';renderStage()");
+  assert.equal((view.match(/id="argumentWorkbook"/g)||[]).length,1);
+  assert.equal((view.match(/class="argument-insights-dock"/g)||[]).length,1);
+  assert.equal((view.match(/class="argument-paragraph-card"/g)||[]).length,6);
+  assert.equal((view.match(/data-action="argumentScrollTo"/g)||[]).length,7);
+  assert.match(view,/PARAGRAPH 5/);
+  assert.match(view,/id="argumentWorkbookBody"/);
  });
  test(path+': workbook notes persist independently of stage one redo',()=>{
   const {run}=appFrom(path);
