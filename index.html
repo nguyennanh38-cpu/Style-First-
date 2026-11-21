@@ -151,6 +151,60 @@
 @media(max-width:1000px){.reading-question-pane:has(.argument-workbook){position:relative;top:auto}.argument-workbook{max-height:calc(100vh - 230px);min-height:380px}}
 @media(max-width:720px){.argument-mode-tabs{gap:6px}.argument-mode-tabs button{padding:10px 8px;font-size:11px}.argument-workbook{max-height:calc(100vh - 240px)}.argument-workbook-body{padding:15px}.argument-workbook-foot{font-size:10px}}
 
+
+/* Stage 01 unified analysis: full essay + one scrollable notebook + permanent discoveries. */
+.workspace.reading-layout:has(.argument-unified) .main{padding-top:17px}
+.argument-unified{height:calc(100vh - 110px);max-height:none;min-height:440px;overflow:hidden;display:flex;flex-direction:column}
+.reading-question-pane:has(.argument-unified){position:sticky;top:89px;min-width:0}
+.argument-unified .argument-workbook-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;scroll-behavior:smooth;padding:16px 18px 25px}
+.argument-notebook-heading{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.argument-notebook-heading h2{font-size:18px;margin:3px 0 0;letter-spacing:-.5px}
+.argument-unified .argument-saved-status{font-size:10px;padding:4px 8px;white-space:nowrap}
+.argument-notebook-intro{font-size:11px;color:#667890;line-height:1.55;margin:8px 0 12px}
+.argument-jumpbar{position:sticky;top:-16px;z-index:3;padding:9px 0;background:#fff;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid #e5eaf1;margin:0 0 14px}
+.argument-jump-button{border:1px solid #d3ddeb;background:#f7f9fc;border-radius:7px;padding:6px 9px;font-size:11px;color:#637590;font-weight:800;cursor:pointer}
+.argument-jump-button.has-notes{color:#216b56;background:#edf7ef;border-color:#b9d5c0}
+.argument-jump-button:hover,.argument-jump-button.active{background:#e7effd;border-color:#91b2de;color:#225ca7}
+.argument-overview-card,.argument-paragraph-card{background:#fff;border:1px solid #e0e8f2;border-radius:11px;padding:13px 15px;margin:0 0 11px;scroll-margin-top:68px}
+.argument-overview-card{background:#f7faff;border-color:#d2e1f4}
+.argument-card-head{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.argument-card-head h2{font-size:15px;margin:5px 0 0}
+.argument-coverage{font-size:10px;color:#56728e;font-weight:750}
+.argument-paragraph-number{min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;background:#e7effa;color:#2864a9;border-radius:7px;font-size:11px;font-weight:900}
+.argument-card-label{display:flex;align-items:center;gap:9px}
+.argument-card-label strong{display:block;font-size:12px;color:#29384c}
+.argument-card-label small{display:block;font-size:10px;color:#7690a2;margin-top:2px}
+.argument-card-hint{font-size:11px;color:#7c8b9c;line-height:1.55;margin:9px 0 6px}
+.argument-unified .argument-field{margin:8px 0 0}
+.argument-unified .argument-field-label{font-size:11px;margin-bottom:5px}
+.argument-unified .argument-textarea{min-height:67px;font-size:12px;line-height:1.65;padding:10px 11px}
+.argument-saved-extras{border-top:1px dashed #dfe7f0;margin-top:12px;padding-top:9px}
+.argument-saved-heading{font-size:10px;color:#78909f;font-weight:750}
+.argument-preserved-field .argument-field-label{font-size:10px;color:#657991}
+.argument-end-marker{text-align:center;font-size:10px;color:#8d9ba8;padding:9px 0}
+.argument-insights-dock{flex:0 0 auto;position:relative;border-top:2px solid #adc6e5;background:#f1f6fc;padding:11px 16px 12px;box-shadow:0 -8px 18px rgba(28,62,112,.06);z-index:5}
+.argument-insights-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.argument-insights-head strong{font-size:13px;color:#234f82;flex:1}
+.argument-insight-sparkle{color:#4f7db9;font-size:16px}
+.argument-insights-head .argument-saved-status{background:#e3f0e8;color:#497c64}
+.argument-insights-dock p{font-size:10px;color:#607590;margin:3px 0 7px}
+.argument-unified .argument-insights-field{margin:0}
+.argument-insights-field .argument-field-label{display:none}
+.argument-insights-field textarea{height:clamp(88px,15vh,158px);min-height:84px;max-height:30vh;overflow:auto;resize:vertical;background:#fff;border-color:#b2c9e6;font-size:12px}
+@media(max-width:1000px){
+ .reading-question-pane:has(.argument-unified){position:relative;top:auto}
+ .argument-unified{height:calc(100vh - 200px);min-height:390px}
+ .argument-insights-field textarea{height:110px}
+}
+@media(max-width:720px){
+ .argument-unified{height:calc(100vh - 205px);min-height:350px}
+ .argument-unified .argument-workbook-body{padding:12px}
+ .argument-jumpbar{top:-12px;gap:4px}
+ .argument-jump-button{padding:6px 8px}
+ .argument-insights-dock{padding:9px 12px}
+ .argument-insights-field textarea{height:105px}
+}
+
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
