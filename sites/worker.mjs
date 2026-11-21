@@ -46,6 +46,14 @@ function mergeSession(a,b,backups){
  }
  return primary;
 }
+function mergeArgumentWorkbook(a,b){
+ const left=a&&typeof a==='object'?a:{},right=b&&typeof b==='object'?b:{};
+ const first=(Date.parse(left.updatedAt||'')||0)<=(Date.parse(right.updatedAt||'')||0)?left:right;
+ const second=first===left?right:left;
+ const drafts={...((first.drafts&&typeof first.drafts==='object')?first.drafts:{})};
+ for(const [k,v]of Object.entries(second.drafts||{}))if(typeof v==='string')drafts[k]=v;
+ return {drafts,updatedAt:(Date.parse(left.updatedAt||'')||0)>(Date.parse(right.updatedAt||'')||0)?left.updatedAt||null:right.updatedAt||null};
+}
 function mergeProgress(a={},b={}){
  const result={};
  for(const k of new Set([...Object.keys(a||{}),...Object.keys(b||{})])){
@@ -56,7 +64,7 @@ function mergeProgress(a={},b={}){
   const backups=unique([...(x.sessionBackups||[]),...(y.sessionBackups||[])])
     .filter(z=>z&&typeof z==="object"&&z.data);
   const session=mergeSession(x.session,y.session,backups);
-  result[k]={history:history.slice(-2000),session,sessionBackups:unique(backups).slice(-30)};
+  result[k]={history:history.slice(-2000),session,sessionBackups:unique(backups).slice(-30),...(k==='1'&&(x.argumentWorkbook||y.argumentWorkbook)?{argumentWorkbook:mergeArgumentWorkbook(x.argumentWorkbook,y.argumentWorkbook)}:{})};
  }
  return result;
 }
