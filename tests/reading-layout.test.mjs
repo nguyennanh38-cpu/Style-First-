@@ -67,8 +67,9 @@ for(const path of ['../index.html','../sites/index.html']){
   const view=run("db=fresh();mode='stage';stageId='1';renderStage()");
   assert.equal((view.match(/id="argumentWorkbook"/g)||[]).length,1);
   assert.equal((view.match(/class="argument-insights-dock"/g)||[]).length,1);
-  assert.equal((view.match(/class="argument-paragraph-card"/g)||[]).length,6);
-  assert.equal((view.match(/data-action="argumentScrollTo"/g)||[]).length,7);
+  const paragraphCount=run("splitEssay(selected().essay).paragraphs.length");
+  assert.equal((view.match(/class="argument-paragraph-card"/g)||[]).length,paragraphCount);
+  assert.equal((view.match(/data-action="argumentScrollTo"/g)||[]).length,paragraphCount+1);
   assert.match(view,/PARAGRAPH 5/);
   assert.match(view,/id="argumentWorkbookBody"/);
  });
