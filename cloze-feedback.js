@@ -31,6 +31,18 @@ function edits(a,b){
  }
  return dp[x.length][y.length];
 }
+function internalTwoCharacterOmissionOrInsertion(a,b){
+ // Detect one two-character insertion/deletion inside a long token, with
+ // unchanged prefix and suffix. Do not infer negation prefixes or inflections.
+ const x=[...a],y=[...b];
+ const shorter=x.length<=y.length?x:y;
+ const longer=x.length<=y.length?y:x;
+ if(longer.length-shorter.length!==2||shorter.length<9)return false;
+ let prefix=0,suffix=0;
+ while(prefix<shorter.length&&shorter[prefix]===longer[prefix])prefix++;
+ while(suffix<shorter.length-prefix&&shorter[shorter.length-suffix-1]===longer[longer.length-suffix-1])suffix++;
+ return prefix>=4&&suffix>=4&&prefix+suffix===shorter.length;
+}
 function isLikelyTypo(a,b){
  const x=cleanWord(a),y=cleanWord(b);
  if(x===y)return false;
@@ -42,7 +54,7 @@ function isLikelyTypo(a,b){
  if(/(?:s|ed|ing|er|est|ly)$/.test(y)&&!/(?:s|ed|ing|er|est|ly)$/.test(x))return false;
  if((x.endsWith("s")&&x.slice(0,-1)===y)||(y.endsWith("s")&&y.slice(0,-1)===x))return false;
  if((x.endsWith("ed")&&x.slice(0,-2)===y)||(y.endsWith("ed")&&y.slice(0,-2)===x))return false;
- return edits(x,y)===1;
+ return edits(x,y)===1||internalTwoCharacterOmissionOrInsertion(x,y);
 }
 function coordinatedReorderingOnly(answer,expected){
  // Treat as minor only an actual AND/OR enumeration with identical whole items.
