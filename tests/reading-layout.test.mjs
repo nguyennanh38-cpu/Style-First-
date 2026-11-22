@@ -88,3 +88,36 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.doesNotMatch(cloze,/class="reading-workspace"/);
  });
 }
+
+ test(path+': every essay has its own rename control, independent of the opening button',()=>{
+  const {html,run}=appFrom(path);
+  const cards=run("db=fresh(); const original=db.essays[0]; db.essays.push({...original,id:'another-essay',title:'Another paper',progress:{}});renderDashboard()");
+  assert.equal((cards.match(/class="essay-rename-action"/g)||[]).length,2);
+  assert.equal((cards.match(/class="essay-tile-wrap"/g)||[]).length,2);
+  assert.match(cards,/data-action="renameEssay"/);
+  assert.match(cards,/data-action="selectEssay"/);
+  assert.match(cards,/Rename Another paper/);
+  assert.match(html,/id="renameEssayModal"/);
+  assert.match(html,/id="renameEssayForm"/);
+ });
+ test(path+': renaming preserves essay IDs, source, progress and selected essay',()=>{
+  const {run}=appFrom(path);
+  const result=run("db=fresh(); const e=db.essays[0];e.progress={'5':{history:[{complete:true}],session:{drafts:{0:'remember'},results:{},current:0}}};const original=e.essay;const before=JSON.stringify(e.progress);const id=e.id;const selectedId=db.selectedId;const result=renameEssayRecord(id,'  New Study Title  ');({result,title:e.title,unchangedSource:e.essay===original,unchangedProgress:JSON.stringify(e.progress)===before,unchangedId:e.id===id,unchangedSelection:db.selectedId===selectedId})");
+  assert.equal(result.result.ok,true);
+  assert.equal(result.result.changed,true);
+  assert.equal(result.title,'New Study Title');
+  assert.equal(result.unchangedSource,true);
+  assert.equal(result.unchangedProgress,true);
+  assert.equal(result.unchangedId,true);
+  assert.equal(result.unchangedSelection,true);
+ });
+ test(path+': invalid or unchanged names do not modify an essay',()=>{
+  const {run}=appFrom(path);
+  const result=run("db=fresh();const essay=db.essays[0];const old=essay.title; const empty=renameEssayRecord(essay.id,'  ');const tooLong=renameEssayRecord(essay.id,'a'.repeat(121));const unchanged=renameEssayRecord(essay.id,old);const absent=renameEssayRecord('no-such-id','Other');({empty,tooLong,unchanged,absent,old,title:essay.title})");
+  assert.equal(result.empty.ok,false);
+  assert.equal(result.tooLong.ok,false);
+  assert.equal(result.absent.ok,false);
+  assert.equal(result.unchanged.ok,true);
+  assert.equal(result.unchanged.changed,false);
+  assert.equal(result.title,result.old);
+ });
