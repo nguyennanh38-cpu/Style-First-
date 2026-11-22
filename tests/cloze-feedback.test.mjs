@@ -119,3 +119,27 @@ test('Correct word stays unchanged when comma is present only in original',()=>{
  assert.equal(r.expected,'provincial ones<strong class="cloze-diff-char">,</strong>');
  assert.equal(r.answer,'provincial ones');
 });
+
+test('Two missing adjacent internal letters are yellow, not red',()=>{
+ const typed='an oversimplication to view it as';
+ const original='an oversimplification to view it as';
+ assert.equal(classify(typed,original).kind,'minor');
+ assert.equal(classifyWithContext(typed,original,'','').kind,'minor');
+ assert.match(highlight(typed,original).expected,/oversimpli<strong class="cloze-diff-char">fi<\/strong>cation/);
+ assert.equal(classify('an oversimplification to view it as',original).kind,'exact');
+});
+test('Recognizes other conservative two-character omissions inside long words',()=>{
+ assert.equal(classify('oversimplication','oversimplification').kind,'minor');
+ assert.equal(classify('oversimplification','oversimplication').kind,'minor');
+});
+test('Preserves red for real meaning or grammatical changes',()=>{
+ for(const [student,original] of [
+  ['unhappy','happy'],['inefficient','efficient'],
+  ['coffer','coffers'],['especially those','particularly those'],
+  ['could propose','might propose'],['oversimplication to view it','oversimplification to view it as']
+ ])assert.equal(classify(student,original).kind,'major',student);
+});
+test('No false error in unchanged words adjacent to a typo',()=>{
+ const markup=highlight('an oversimplication to view it as','an oversimplification to view it as').expected;
+ assert.doesNotMatch(markup,/<strong[^>]*>(an|to|view|it|as)<\/strong>/);
+});
