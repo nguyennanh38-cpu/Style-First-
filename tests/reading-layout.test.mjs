@@ -8,7 +8,7 @@ function appFrom(path){
  const source=html.match(/<script>\s*([\s\S]*?)<\/script>/)?.[1];
  assert.ok(source,'Main training script must exist');
  assert.doesNotThrow(()=>new vm.Script(source),'Main script must be syntactically valid');
- const sandbox=vm.createContext({console,Math,Date,Intl,URL,TextEncoder,window:{}});
+ const sandbox=vm.createContext({console,Math,Date,Intl,URL,TextEncoder,window:{},localStorage:{getItem:()=>null,setItem:()=>{}}});
  vm.runInContext(readFileSync(new URL('../argument-workbook.js',import.meta.url),'utf8'),sandbox,{timeout:5000});
  vm.runInContext(source.replace(/\binitialize\(\);\s*$/,''),sandbox,{timeout:5000});
  const run=expression=>vm.runInContext(expression,sandbox,{timeout:15000});
