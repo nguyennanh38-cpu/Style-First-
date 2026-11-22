@@ -180,6 +180,21 @@ function highlightCaseCharacters(reference,learner){
  });
  return changed&&html.every(part=>part!==null)?html.join(''):null;
 }
+function highlightSmallWordDifference(reference,learner){
+ // Highlight just the letters inserted or substituted in the original
+ // when two words are close enough. Preserve whole-word highlighting for
+ // unrelated substitutions and grammatical differences.
+ const a=[...String(reference)],b=[...String(learner)];
+ const min=Math.min(a.length,b.length);
+ let prefix=0,suffix=0;
+ while(prefix<min&&a[prefix].toLowerCase()===b[prefix].toLowerCase())prefix++;
+ while(suffix<min-prefix&&a[a.length-suffix-1].toLowerCase()===b[b.length-suffix-1].toLowerCase())suffix++;
+ const changed=a.slice(prefix,a.length-suffix),other=b.slice(prefix,b.length-suffix);
+ if(!changed.length||changed.length>2||other.length>2)return null;
+ const x=cleanWord(reference),y=cleanWord(learner);
+ if(edits(x,y)>1&&!internalTwoCharacterOmissionOrInsertion(x,y))return null;
+ return safe(a.slice(0,prefix).join(''))+'<strong class="cloze-diff-char">'+safe(changed.join(''))+'</strong>'+safe(a.slice(a.length-suffix).join(''));
+}
 function highlight(answer,expected){
  // Align words independently of punctuation. Never flag an otherwise correct
  // word just because the user added, removed or moved punctuation beside it.
@@ -198,7 +213,7 @@ function highlight(answer,expected){
   else if(a[i].key===b[j].key)dp[i][j]=dp[i+1][j+1];
   else dp[i][j]=1+Math.min(dp[i+1][j+1],dp[i+1][j],dp[i][j+1]);
  }
- const linksA=new Map(),linksB=new Map();
+ const linksA=new Map(),linksB=new Map(),replacementsA=new Map(),replacementsB=new Map();
  for(let i=0,j=0;i<n||j<m;){
   if(i<n&&j<m&&a[i].key===b[j].key&&dp[i][j]===dp[i+1][j+1]){
    linksA.set(i,j);linksB.set(j,i);i++;j++;continue;
@@ -207,7 +222,7 @@ function highlight(answer,expected){
   const deletion=i<n?dp[i+1][j]:1e6;
   const insertion=j<m?dp[i][j+1]:1e6;
   const best=Math.min(sub,deletion,insertion);
-  if(best===sub){i++;j++;}
+  if(best===sub){replacementsA.set(i,j);replacementsB.set(j,i);i++;j++;}
   else if(best===deletion)i++;
   else j++;
  }
@@ -223,7 +238,7 @@ function highlight(answer,expected){
    return '<strong class="cloze-diff-char">'+safe(ch)+'</strong>';
   }).join('');
  }
- function render(text,words,links,peer,peerWords){
+ function render(text,words,links,replacements,peer,peerWords){
   let output='',cursor=0;
   for(let i=0;i<=words.length;i++){
    const next=i<words.length?words[i].start:text.length;
@@ -243,15 +258,19 @@ function highlight(answer,expected){
    output+=punctuation(gap,otherGap);
    if(i===words.length)break;
    const word=words[i],match=links.get(i);
-   if(match===undefined)output+='<strong class="cloze-diff-word">'+safe(word.value)+'</strong>';
+   if(match===undefined){
+    const replaced=replacements.get(i);
+    const precise=replaced===undefined?null:highlightSmallWordDifference(word.value,peerWords[replaced].value);
+    output+=precise||'<strong class="cloze-diff-word">'+safe(word.value)+'</strong>';
+   }
    else output+=highlightCaseCharacters(word.value,peerWords[match].value)||safe(word.value);
    cursor=word.end;
   }
   return output;
  }
  return {
-  expected:render(original,a,linksA,input,b),
-  answer:render(input,b,linksB,original,a),
+  expected:render(original,a,linksA,replacementsA,input,b),
+  answer:render(input,b,linksB,replacementsB,original,a),
   differences:(n-linksA.size)+(m-linksB.size)
  };
 }
