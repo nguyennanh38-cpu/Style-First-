@@ -87,7 +87,6 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.match(cloze,/cloze-passage/);
   assert.doesNotMatch(cloze,/class="reading-workspace"/);
  });
-}
 
  test(path+': every essay has its own rename control, independent of the opening button',()=>{
   const {html,run}=appFrom(path);
@@ -121,3 +120,4 @@ for(const path of ['../index.html','../sites/index.html']){
   assert.equal(result.unchanged.changed,false);
   assert.equal(result.title,result.old);
  });
+}
