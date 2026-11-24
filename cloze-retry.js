@@ -63,7 +63,8 @@ function field(blank,m){
 }
 function passage(cloze,m){
  const indices=new Set(m.pending);
- const blocks=activeParagraphs(cloze,m.pending);
+ const original=sourceText(cloze);
+ const blocks=paragraphs(original).map(p=>({...p,original}));
  return blocks.map((p,i)=>{
   const gaps=cloze.blanks.filter(b=>b.start>=p.start&&b.end<=p.end);
   let cursor=p.start,html='';
@@ -87,14 +88,14 @@ function render(cloze,progress){
  const status=m.checked?(success?'All blanks corrected':correct+' of '+n+' corrected'):'Only '+n+' incorrect '+(n===1?'blank':'blanks')+' to fill';
  const content=success?
   '<div class="cloze-retry-success"><strong>Excellent — all targeted blanks are correct.</strong><p>Review completed without changing your original Cloze score.</p></div>':
-  '<div class="cloze-passage cloze-retry-passage" aria-label="Retry only incorrect blanks in their original paragraphs">'+passage(cloze,m)+'</div>';
+  '<div class="cloze-passage cloze-retry-passage" aria-label="Full essay context with only incorrect blanks hidden">'+passage(cloze,m)+'</div>';
  const button=m.checked?
   '<button type="button" class="btn btn-outline" data-action="redoClozeRetry">'+(success?'Practice missed blanks again':'Retry remaining mistakes')+'</button>':
   '<button type="button" class="btn btn-blue" data-action="checkClozeRetry">Check corrections</button>';
  return '<section class="cloze-retry-panel" id="clozeRetryPanel" aria-label="Targeted practice for incorrect Cloze answers">'+
   '<div class="cloze-retry-top"><div><div class="eyebrow">TARGETED PRACTICE · NO AI REQUIRED</div><h3>Retry incorrect blanks</h3></div>'+
   '<span class="tag blue">'+total+' originally missed</span></div>'+
-  '<p class="cloze-retry-explainer">Only the blanks you missed are hidden. Correct answers and paragraphs without mistakes stay out of the way. Reconstruct the author’s exact wording.</p>'+
+  '<p class="cloze-retry-explainer">The full essay is shown for context. Only the expressions you still need to practise are hidden.</p>'+
   '<div class="cloze-retry-status"><span>'+status+'</span><span>'+attemptLabel+' '+(attemptLabel===1?'retry':'retries')+' checked</span></div>'+
   content+'<div class="cloze-retry-footer"><span class="footer-hint">Answers are saved as you type. Your original score and attempt history stay unchanged.</span>'+button+'</div></section>';
 }
