@@ -882,7 +882,7 @@ function readingMobileTabs(){
 }
 function renderReader(){
  const e=selected();if(!e)return renderDashboard();
- return '<div class="reader-page"><header class="exercise-toolbar" aria-label="Original essay controls"><div class="exercise-identity"><h1 class="exercise-stage-title">Original essay</h1><button class="sample-link exercise-essay-link" data-action="overview">'+esc(e.title)+'</button></div><div class="exercise-controls"><button class="btn btn-outline" data-action="backFromReader">'+icon('chevronLeft')+' Back to '+(readerReturn==='stage'?'exercise':'overview')+'</button><button class="btn btn-dark" data-action="stage" data-id="'+stageId+'">'+icon('edit')+' '+(readerReturn==='stage'?'Resume exercise':'Start practice')+'</button></div></header>'+readingSourcePanel(e)+'</div>';
+ return '<div class="reader-page"><header class="exercise-toolbar" aria-label="Original essay controls"><div class="exercise-identity"><h1 class="exercise-stage-title">Read the original essay</h1><button class="sample-link exercise-essay-link" data-action="overview">'+esc(e.title)+'</button></div><div class="exercise-controls"><button class="btn btn-outline" data-action="backFromReader">'+icon('chevronLeft')+' Back to '+(readerReturn==='stage'?'exercise':'overview')+'</button><button class="btn btn-dark" data-action="stage" data-id="'+stageId+'">'+icon('edit')+' '+(readerReturn==='stage'?'Resume exercise':'Start practice')+'</button></div></header>'+readingSourcePanel(e)+'</div>';
 }
 
 function renderTask(data,p,st,i){const task=data.tasks[i],ses=p.session,result=ses.results[i],answer=ses.drafts[i]||'',done=Object.keys(ses.results).length===data.tasks.length;
