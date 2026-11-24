@@ -558,6 +558,20 @@
  .exercise-toolbar .exercise-controls{margin-left:0}
  .cloze-compare{height:auto}
 }
+
+/* Primary revision actions: deliberately larger than neighboring controls. */
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]){
+ font-size:23px;font-weight:800;padding:10px 17px;min-height:48px;line-height:1.25;
+ border-color:#9bb2d9;box-shadow:0 0 0 1px #dce6f5;max-width:100%;white-space:normal;
+}
+.exercise-toolbar button.btn[data-action="redo"]{font-size:21px;padding:8px 14px;min-height:42px;white-space:normal}
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]) .lucide{width:20px;height:20px}
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]):not(:disabled):hover{background:#eaf1ff;border-color:#668bc7}
+.cloze-compare .cloze-retry-footer button[data-action="redoClozeRetry"]{flex:0 1 auto}
+@media(max-width:720px){
+ button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]){font-size:20px;padding:9px 13px}
+ .exercise-toolbar button.btn[data-action="redo"]{font-size:20px}
+}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
