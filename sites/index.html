@@ -501,6 +501,38 @@
  .top-cta{padding:6px 8px}
  .essay-grid{grid-template-columns:1fr}
 }
+
+/* Unified navigation: one readable sidebar, all remaining width for study. */
+.sidebar{border-right:1px solid var(--line)}
+.sidebar-inner{padding:12px 9px 18px}
+.sidebar .sidebar-caption,.sidebar .side-group-heading{font-size:19.5px;letter-spacing:.6px;line-height:1.3}
+.sidebar .nav-home,.sidebar .nav-utility,.sidebar .library-entry,.sidebar .stage-text strong{font-size:25.35px;line-height:1.3}
+.sidebar .stage-text strong,.sidebar .library-entry span{white-space:normal;overflow-wrap:anywhere;overflow:visible;text-overflow:clip}
+.sidebar .tiny-progress{font-size:21.45px;white-space:nowrap;align-self:center}
+.sidebar .stage-number{font-size:19.5px;min-width:2.2em;height:2em}
+.sidebar .stage-status{width:19px;height:19px}
+.sidebar .nav-home,.sidebar .nav-utility,.sidebar .library-entry,.sidebar .stage-entry{padding:7px 5px;gap:8px}
+.sidebar .side-group-heading{margin:15px 5px 8px}
+.sidebar .sidebar-rule{margin:12px 5px}
+.sidebar .sidebar-caption{padding:4px 5px 7px}
+.sidebar .group-tag{font-size:19.5px;letter-spacing:.6px}
+.sidebar .icon-btn-small{padding:6px;flex:none}
+.sidebar .icon-btn-small .lucide{width:20px;height:20px}
+.sidebar .side-progress{border:1px solid var(--line);border-radius:9px;padding:10px;margin:12px 0;background:#f6f8fa;font-size:23.4px;line-height:1.4;overflow-wrap:anywhere}
+.side-progress-heading{font-size:19.5px;font-weight:750;color:#53657c;margin:0 0 5px}
+.side-progress-main{display:flex;align-items:baseline;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.side-progress-main strong{font-size:32px;color:#254e45}
+.side-progress .progress-track{height:7px;margin:7px 0}
+.side-progress-meta{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:19.5px;color:#53657c}
+@media(min-width:721px){
+ .workspace,.workspace:has(.hero),.workspace.reading-layout{grid-template-columns:clamp(285px,23vw,390px) minmax(0,1fr)}
+ .workspace .main,.workspace.reading-layout .main{padding-inline:8px}
+ .workspace .main-content{max-width:none}
+}
+@media(max-width:720px){
+ .sidebar{width:min(390px,94vw);left:-400px}
+ .sidebar.open{left:0}
+}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -530,20 +562,21 @@
           <button class="nav-home" id="navReader" title="Read the complete model essay"><span data-icon="book"></span> Original essay <span data-icon="chevronRight" class="push-right"></span></button>
           <div class="side-group-heading"><span>ESSAY LIBRARY</span><button class="icon-btn icon-btn-small" id="newEssaySide" aria-label="Add essay"><span data-icon="plus"></span></button></div>
           <div id="librarySide" class="library-side"></div>
+          <div id="inspectorContent"></div>
           <div class="sidebar-rule"></div>
-          <div class="sidebar-caption">THE 12-STAGE METHOD</div>
+          <div class="sidebar-caption">EXERCISES</div>
           <div id="stageNav"></div>
           <div class="sidebar-rule"></div>
           <button class="nav-utility" id="exportButton"><span data-icon="download"></span> Export my progress</button>
           <button class="nav-utility" id="importButton"><span data-icon="upload"></span> Import progress</button>
           <input type="file" id="importFile" accept=".json,application/json" hidden />
-          <div class="sidebar-note"><span data-icon="shield"></span><p>Your essays and attempts stay in this browser unless you export them.</p></div>
+          
         </div>
       </aside>
 
       <main class="main" id="main"><div id="mainContent"></div></main>
 
-      <aside class="inspector" id="inspector"><div id="inspectorContent"></div></aside>
+      
     </div>
   </div>
 
@@ -759,8 +792,8 @@ function closeModal(id){D(id).hidden=true;}
 function apiPost(endpoint,data){return fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','x-app-code':db.accessCode||''},body:JSON.stringify(data)}).then(async r=>{let d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'The AI request failed.');return d;});}
 function header(){D('topbarContext').textContent=mode==='dashboard'?'Learn the thinking. Remember the phrasing.':selected()?.title||'Essay training';D('connection').innerHTML=`<span class="live-dot" style="background:${ai.enabled?'#6bb58b':'#dea861'}"></span>${ai.enabled?'AI feedback on':'Offline-ready'}`;}
 function side(){const e=selected();D('librarySide').innerHTML=db.essays.map(x=>`<button class="library-entry ${e?.id===x.id?'active':''}" data-action="selectEssay" data-id="${esc(x.id)}">${icon('file')}<span>${esc(x.title)}</span><small class="tiny-progress">${completedCount(x)}/15</small></button>`).join('');
- let previous='';D('stageNav').innerHTML=STAGES.map(s=>{const heading=previous!==s.group?`<div class="group-tag">${esc(s.group)}</div>`:'';previous=s.group;return `${heading}<button class="stage-entry ${mode==='stage'&&stageId===s.id?'active':''}" data-action="stage" data-id="${s.id}" ${!e?'disabled':''}><span class="stage-number">${esc(s.number)}</span><span class="stage-text"><strong>${esc(s.title)}</strong><small>${esc(s.short)}</small></span>${completed(e||{},s.id)?icon('checkCircle','stage-status'):''}</button>`;}).join('');D('navHome').classList.toggle('active',mode==='dashboard');D('navReader').classList.toggle('active',mode==='reader');D('navReader').disabled=!e;}
-function inspector(){let e=selected();const t=e?totals(e):{completed:0,attempts:0,words:0},percent=Math.round(100*t.completed/STAGES.length);D('inspectorContent').innerHTML=`<div class="inspector-wrap"><div class="inspector-label">MASTERY TRACKER</div><h3 class="inspector-title">Your writing practice</h3><div class="inspector-card"><div class="mastery-ring" style="--progress:${percent}%"><div class="mastery-ring-inner"><strong>${percent}%</strong><small>COMPLETED</small></div></div><div class="mini-stat"><span>Exercises completed</span><strong>${t.completed} / 15</strong></div><div class="mini-stat"><span>Saved attempts</span><strong>${t.attempts}</strong></div><div class="mini-stat"><span>Essay length</span><strong>${t.words} words</strong></div></div><div class="inspector-label">THE METHOD</div><div class="inspector-card"><div class="mini-stat"><span>01 — Understand</span><strong>Logic + lexicon</strong></div><div class="mini-stat"><span>02 — Reconstruct</span><strong>Exact wording</strong></div><div class="mini-stat"><span>03 — Remember</span><strong>20 / 40 / 60%</strong></div><div class="mini-stat"><span>04 — Master</span><strong>Full essay</strong></div></div><div class="quote-card"><div class="quote-mark">“</div><p>The goal isn’t to write something similar. It’s to learn what makes this writer’s choices work.</p><small>STYLE FIRST · STUDY PRINCIPLE</small></div></div>`;}
+ D('stageNav').innerHTML=STAGES.map(s=>{return `<button class="stage-entry ${mode==='stage'&&stageId===s.id?'active':''}" data-action="stage" data-id="${s.id}" ${!e?'disabled':''}><span class="stage-number">${esc(s.number)}</span><span class="stage-text"><strong>${esc(s.title)}</strong></span>${completed(e||{},s.id)?icon('checkCircle','stage-status'):''}</button>`;}).join('');D('navHome').classList.toggle('active',mode==='dashboard');D('navReader').classList.toggle('active',mode==='reader');D('navReader').disabled=!e;}
+function inspector(){const e=selected();const t=e?totals(e):{completed:0,attempts:0,words:0},percent=Math.round(100*t.completed/STAGES.length);D('inspectorContent').innerHTML=e?`<section class="side-progress" aria-label="Selected essay progress"><div class="side-progress-heading">YOUR PROGRESS</div><div class="side-progress-main"><strong>${percent}%</strong><span>${t.completed}/${STAGES.length} done</span></div><div class="progress-track" role="progressbar" aria-label="Exercises completed" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"><span style="width:${percent}%"></span></div><div class="side-progress-meta"><span>${t.attempts} attempts</span><span>${t.words} words</span></div></section>`:'';}
 function render(){header();side();inspector();D('workspace').classList.toggle('reading-layout',mode==='reader'||mode==='stage'&&['1','2'].includes(stageId));const node=D('mainContent');node.className='main-content';if(mode==='dashboard')node.innerHTML=renderDashboard();else if(mode==='overview')node.innerHTML=renderOverview();else if(mode==='reader')node.innerHTML=renderReader();else node.innerHTML=renderStage();const scroller=D('readingSourceScroll');if(scroller)scroller.scrollTop=mode==='reader'?readerSourceTop:stageSourceTop;}
 function renderDashboard(){let es=db.essays;const total=es.reduce((n,e)=>n+Object.values(e.progress||{}).reduce((a,p)=>a+(p.history?.length||0),0),0);const done=es.reduce((n,e)=>n+completedCount(e),0);
  return `<div class="page-kicker">YOUR WORKSPACE <span class="dot"></span> PERSONAL LEARNING SYSTEM</div><section class="hero"><div class="hero-asterisk">✳</div><div class="hero-grid"><div class="eyebrow">ESSAY MASTERY, SYSTEMATIZED</div><h1>Study the writing. Own the style.</h1><p>Paste any model essay. Work through 12 progressive training stages. Get corrections after each exercise — then retry until the language becomes your own.</p><button class="btn" data-action="addEssay">${icon('plus')} Train a new essay</button></div></section><div class="metric-row"><div class="metric-box"><strong>${es.length.toString().padStart(2,'0')}</strong><small>ESSAYS IN LIBRARY</small></div><div class="metric-box"><strong>${done}</strong><small>EXERCISES FINISHED</small></div><div class="metric-box"><strong>${total}</strong><small>RECORDED ATTEMPTS</small></div></div><div class="section-heading"><h2>Your essay library</h2><span>${es.length} saved</span></div><div class="essay-grid">${es.map(e=>`<div class="essay-tile-wrap"><button type="button" class="essay-tile" data-action="selectEssay" data-id="${esc(e.id)}"><div class="essay-tile-header"><span class="essay-tile-type">IELTS WRITING TASK 2</span></div><h3>${esc(e.title)}</h3><p>${esc(e.question||'Self-study essay')}</p><div class="essay-tile-bottom"><span>${wordCount(e.essay)} words</span><span>${completedCount(e)} / 15 stages</span></div><div class="progress-track" style="margin-top:10px"><span style="width:${Math.round(100*completedCount(e)/15)}%"></span></div></button><button type="button" class="essay-rename-action" data-action="renameEssay" data-id="${esc(e.id)}" aria-label="Rename ${esc(e.title)}" title="Rename essay">${icon('edit')} Rename</button></div>`).join('')}<button class="essay-tile add-tile" data-action="addEssay"><div class="add-icon">${icon('plus')}</div><h3>Add a new essay</h3><p>Paste any writer’s essay to begin</p></button></div><div class="section-heading"><h2>How training works</h2><span>Gradual removal of support</span></div><div class="flow-grid"><div class="flow-card"><span class="num">01</span><div><h4>Understand</h4><p>Map the argument and collect useful lexical chunks.</p></div></div><div class="flow-card"><span class="num">02</span><div><h4>Reconstruct</h4><p>Write the author’s actual sentences with guided cues.</p></div></div><div class="flow-card"><span class="num">03</span><div><h4>Internalize</h4><p>Fill heavier gaps, then rebuild the whole essay.</p></div></div></div>`;}
