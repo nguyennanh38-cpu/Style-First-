@@ -572,6 +572,24 @@ button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoC
  button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]){font-size:20px;padding:9px 13px}
  .exercise-toolbar button.btn[data-action="redo"]{font-size:20px}
 }
+
+/* High-contrast action hierarchy: blue = start/resume, amber = repeat/retry. */
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]){
+ background:#ffd35a;color:#392400;border:2px solid #b57b08;box-shadow:0 2px 0 #b57b08;font-weight:850;
+}
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"]):not(:disabled):hover{background:#ffbd32;border-color:#8f5b00}
+button.btn[data-action="stage"],.hero button.btn[data-action="addEssay"],#createEssayButton{
+ background:#1752c4;color:#fff;border:2px solid #123d99;font-weight:850;font-size:23px;min-height:48px;padding:9px 16px;box-shadow:0 2px 0 #123d99;
+}
+button.btn[data-action="stage"]:not(:disabled):hover,.hero button.btn[data-action="addEssay"]:hover,#createEssayButton:not(:disabled):hover{background:#123e9c}
+.exercise-toolbar button.btn[data-action="stage"]{font-size:21px;min-height:42px;padding:8px 14px}
+.sidebar .stage-entry:not(.active):not(:disabled){border-left:4px solid #2362c9;background:#eff5ff;color:#17458e}
+.sidebar .stage-entry:not(.active):not(:disabled):hover{background:#dbe8ff}
+.sidebar .stage-entry.active{border-left:4px solid #1746a5;background:#d6e5ff;color:#102e70}
+.stage-progress-list .stage-tile[data-action="stage"]{border-left:4px solid #2362c9;background:#f0f5ff}
+.stage-progress-list .stage-tile[data-action="stage"]:hover{background:#dfebff}
+button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoClozeRetry"],[data-action="redoMistakeReview"],[data-action="stage"]):focus-visible{outline:3px solid #172c55;outline-offset:3px}
+@media(max-width:720px){button.btn[data-action="stage"],.hero button.btn[data-action="addEssay"],#createEssayButton{font-size:20px;padding:8px 12px}}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
