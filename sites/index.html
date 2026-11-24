@@ -266,6 +266,131 @@
  .cloze-compare .cloze-retry-top,.cloze-compare .cloze-retry-status,.cloze-compare .cloze-retry-footer,.cloze-compare-heading{flex-shrink:0}
 }
 @media(max-width:720px){.cloze-compare{grid-template-columns:minmax(0,1fr);gap:8px}.cloze-compare-original>.cloze-passage{max-height:52vh;overflow:auto;overscroll-behavior:contain}.cloze-compare .cloze-retry-passage{max-height:60vh;overflow:auto;overscroll-behavior:contain}}
+
+/* Compact workspace: prioritize learning content over decorative spacing. */
+@media(min-width:721px){
+ .workspace{max-width:none;grid-template-columns:210px minmax(0,1fr) 218px}
+ .workspace.reading-layout{grid-template-columns:210px minmax(0,1fr)}
+ .main,.workspace.reading-layout .main{padding:16px 12px 40px}
+ .main-content,.workspace.reading-layout .main-content{max-width:none}
+ .workspace:has(.cloze-compare) .main{padding-inline:6px}
+ .sidebar-inner{padding:14px 9px 16px}
+ .sidebar-caption{padding:2px 9px 8px}
+ .side-group-heading{margin:17px 9px 7px}
+ .sidebar-rule{margin:13px 9px 10px}
+ .group-tag{padding:8px 9px 4px}
+ .stage-entry{padding:6px 8px;margin:1px 0}
+ .library-entry{padding:8px}
+ .sidebar-note{margin:10px 5px 0;padding:8px}
+ .inspector-wrap{padding:16px 11px}
+ .inspector-title{margin:6px 0 8px}
+ .inspector-card{padding:11px;margin-bottom:12px;border-radius:9px}
+ .mastery-ring{width:92px;height:92px;margin:2px auto 10px}
+ .mastery-ring-inner{width:78px;height:78px}
+ .mastery-ring strong{font-size:23px}
+ .mini-stat{padding:7px 0;gap:6px}
+ .quote-card{padding:11px}
+ .quote-mark{font-size:26px}
+ .quote-card p{font-size:12px;line-height:1.55}
+ .page-kicker{margin-bottom:8px}
+ .page-title{font-size:clamp(25px,2vw,34px);margin-bottom:6px;letter-spacing:-1px}
+ .page-subtitle{max-width:none;margin-bottom:12px;line-height:1.55}
+ .stage-top{gap:11px}
+ .stage-number-lg{width:42px;height:42px;border-radius:9px;font-size:16px}
+ .stage-top .page-subtitle{margin-bottom:5px}
+ .stage-actions,.workspace.reading-layout .stage-actions{margin:7px 0 10px;gap:6px}
+ .page-actions{margin:9px 0 12px;gap:8px}
+ .btn{padding:8px 12px;gap:6px}
+ .section-heading{margin:15px 0 8px}
+ .hero{padding:15px 18px;margin-bottom:12px;border-radius:11px}
+ .hero:before,.hero-asterisk{display:none}
+ .hero-grid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 15px;align-items:center}
+ .hero-grid .eyebrow{grid-column:1/-1}
+ .hero h1{grid-column:1;max-width:none;font-size:clamp(21px,2vw,29px);margin:3px 0;letter-spacing:-.7px}
+ .hero p{grid-column:1;max-width:none;font-size:12px;line-height:1.55;margin:0}
+ .hero .btn{grid-column:2;grid-row:2/4;align-self:center}
+ .metric-row{margin:10px 0;gap:8px}
+ .metric-box{padding:10px 12px;border-radius:9px}
+ .metric-box strong{font-size:22px}
+ .essay-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:8px}
+ .essay-tile{padding:12px;min-height:137px;border-radius:9px;box-shadow:none;text-align:left}
+ .essay-tile h3{font-size:15px;margin:8px 0 4px}
+ .essay-tile p{margin:0 0 8px;line-height:1.5}
+ .essay-tile .progress-track{margin-top:7px!important}
+ .add-tile{text-align:center}
+ .flow-grid{gap:8px}
+ .flow-card{padding:10px;gap:8px}
+ .essay-prompt{margin:10px 0 13px;padding:10px 13px;line-height:1.65}
+ .stage-progress-list{gap:6px}
+ .study-block,.reading-question-pane .study-block{padding:12px 14px;margin-bottom:10px;border-radius:9px;box-shadow:none}
+ .task-topline{margin-bottom:9px}
+ .task-question{margin-bottom:10px;line-height:1.6}
+ .hint-box{padding:8px 10px;margin-bottom:10px}
+ .answer-box{padding:10px 12px;min-height:110px}
+ .answer-box.big{min-height:clamp(300px,48vh,600px)}
+ .task-progress-dots{margin-bottom:10px}
+ .task-footer{margin-top:10px;gap:8px}
+ .feedback{margin-top:10px;border-radius:9px}
+ .feedback-head{padding:9px 12px}
+ .feedback-body{padding:11px 13px}
+ .feedback-body p{margin-bottom:8px}
+ .feedback-actions{margin-top:9px}
+ .feedback-issue{padding:7px 0}
+ .notice{padding:8px 10px;margin:8px 0}
+ .cloze-passage{padding:14px 16px;margin:10px 0 12px;line-height:2.15}
+ .cloze-summary{padding:10px 13px;margin-top:10px;gap:12px}
+ .cloze-summary .big-grade{font-size:29px}
+ .attempt-panel{margin-top:12px;padding:12px}
+ .attempt-panel h3{margin-bottom:8px}
+ .mistake-review-panel{margin:12px 0 8px;padding:12px}
+ .mistake-review-passage{padding:10px 12px}
+ .reading-workspace{gap:6px;margin-top:8px}
+ .reading-source-pane,.argument-workbook{border-radius:9px;box-shadow:none}
+ .reading-pane-top{padding:9px 11px 0}
+ .reading-essay-title{margin:5px 11px 8px;font-size:17px}
+ .reading-task-prompt{padding:7px 9px;margin:0 9px 8px}
+ .reading-paragraph-nav{padding:0 9px 7px}
+ .reading-source-scroll{padding:5px 8px 10px}
+ .reading-paragraph{padding:8px 7px}
+ .reading-paragraph p{margin-top:4px;line-height:1.85}
+ .reader-page .reading-source-scroll{padding:10px 14px}
+ .reader-page .reading-paragraph p{max-width:100ch;margin-inline:auto;line-height:1.9}
+ .argument-workbook-body,.argument-unified .argument-workbook-body{padding:10px 11px 14px}
+ .argument-jumpbar{top:-10px;margin-bottom:8px;padding:5px 0}
+ .argument-overview-card,.argument-paragraph-card{padding:9px 11px;margin-bottom:7px}
+ .argument-insights-dock{padding:8px 10px}
+ .argument-insights-field textarea{height:clamp(84px,13vh,145px)}
+ .cloze-compare{margin-top:6px}
+ .cloze-compare .cloze-passage{padding:6px 7px;margin:0}
+ .cloze-compare .cloze-retry-explainer{margin:4px 0 5px}
+ .cloze-compare .cloze-retry-status{margin-bottom:5px}
+ .cloze-compare .cloze-retry-footer{margin-top:6px}
+}
+@media(min-width:721px) and (max-width:1050px){
+ .workspace,.workspace.reading-layout{grid-template-columns:190px minmax(0,1fr)}
+ .main,.workspace.reading-layout .main{padding-inline:10px}
+ .hero-grid{display:block}
+ .hero .btn{margin-top:8px}
+}
+@media(max-width:720px){
+ .main,.workspace.reading-layout .main{padding:16px 10px 45px}
+ .page-kicker{margin-bottom:8px}
+ .page-title{margin-bottom:6px}
+ .page-subtitle{margin-bottom:10px}
+ .stage-actions,.page-actions{margin:8px 0 12px;gap:6px}
+ .hero{padding:17px;margin-bottom:12px}
+ .hero-asterisk,.hero:before{display:none}
+ .hero h1{margin:7px 0}
+ .hero p{margin-bottom:12px}
+ .metric-row{margin:10px 0}
+ .essay-grid{gap:8px}
+ .essay-tile{min-height:130px;padding:12px}
+ .section-heading{margin:15px 0 8px}
+ .study-block,.reading-question-pane .study-block{padding:12px;margin-bottom:10px}
+ .feedback{margin-top:10px}
+ .feedback-body{padding:12px}
+ .attempt-panel{margin-top:12px;padding:12px}
+}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -528,7 +653,7 @@ function side(){const e=selected();D('librarySide').innerHTML=db.essays.map(x=>`
 function inspector(){let e=selected();const t=e?totals(e):{completed:0,attempts:0,words:0},percent=Math.round(100*t.completed/STAGES.length);D('inspectorContent').innerHTML=`<div class="inspector-wrap"><div class="inspector-label">MASTERY TRACKER</div><h3 class="inspector-title">Your writing practice</h3><div class="inspector-card"><div class="mastery-ring" style="--progress:${percent}%"><div class="mastery-ring-inner"><strong>${percent}%</strong><small>COMPLETED</small></div></div><div class="mini-stat"><span>Exercises completed</span><strong>${t.completed} / 15</strong></div><div class="mini-stat"><span>Saved attempts</span><strong>${t.attempts}</strong></div><div class="mini-stat"><span>Essay length</span><strong>${t.words} words</strong></div></div><div class="inspector-label">THE METHOD</div><div class="inspector-card"><div class="mini-stat"><span>01 — Understand</span><strong>Logic + lexicon</strong></div><div class="mini-stat"><span>02 — Reconstruct</span><strong>Exact wording</strong></div><div class="mini-stat"><span>03 — Remember</span><strong>20 / 40 / 60%</strong></div><div class="mini-stat"><span>04 — Master</span><strong>Full essay</strong></div></div><div class="quote-card"><div class="quote-mark">“</div><p>The goal isn’t to write something similar. It’s to learn what makes this writer’s choices work.</p><small>STYLE FIRST · STUDY PRINCIPLE</small></div></div>`;}
 function render(){header();side();inspector();D('workspace').classList.toggle('reading-layout',mode==='reader'||mode==='stage'&&['1','2'].includes(stageId));const node=D('mainContent');node.className='main-content';if(mode==='dashboard')node.innerHTML=renderDashboard();else if(mode==='overview')node.innerHTML=renderOverview();else if(mode==='reader')node.innerHTML=renderReader();else node.innerHTML=renderStage();const scroller=D('readingSourceScroll');if(scroller)scroller.scrollTop=mode==='reader'?readerSourceTop:stageSourceTop;}
 function renderDashboard(){let es=db.essays;const total=es.reduce((n,e)=>n+Object.values(e.progress||{}).reduce((a,p)=>a+(p.history?.length||0),0),0);const done=es.reduce((n,e)=>n+completedCount(e),0);
- return `<div class="page-kicker">YOUR WORKSPACE <span class="dot"></span> PERSONAL LEARNING SYSTEM</div><section class="hero"><div class="hero-asterisk">✳</div><div class="hero-grid"><div class="eyebrow">ESSAY MASTERY, SYSTEMATIZED</div><h1>Study the writing.<br/>Own the style.</h1><p>Paste any model essay. Work through 12 progressive training stages. Get corrections after each exercise — then retry until the language becomes your own.</p><button class="btn" data-action="addEssay">${icon('plus')} Train a new essay</button></div></section><div class="metric-row"><div class="metric-box"><strong>${es.length.toString().padStart(2,'0')}</strong><small>ESSAYS IN LIBRARY</small></div><div class="metric-box"><strong>${done}</strong><small>EXERCISES FINISHED</small></div><div class="metric-box"><strong>${total}</strong><small>RECORDED ATTEMPTS</small></div></div><div class="section-heading"><h2>Your essay library</h2><span>${es.length} saved</span></div><div class="essay-grid">${es.map(e=>`<div class="essay-tile-wrap"><button type="button" class="essay-tile" data-action="selectEssay" data-id="${esc(e.id)}"><div class="essay-tile-header"><span class="essay-tile-type">IELTS WRITING TASK 2</span></div><h3>${esc(e.title)}</h3><p>${esc(e.question?.slice(0,104)||'Self-study essay')}…</p><div class="essay-tile-bottom"><span>${wordCount(e.essay)} words</span><span>${completedCount(e)} / 15 stages</span></div><div class="progress-track" style="margin-top:10px"><span style="width:${Math.round(100*completedCount(e)/15)}%"></span></div></button><button type="button" class="essay-rename-action" data-action="renameEssay" data-id="${esc(e.id)}" aria-label="Rename ${esc(e.title)}" title="Rename essay">${icon('edit')} Rename</button></div>`).join('')}<button class="essay-tile add-tile" data-action="addEssay"><div class="add-icon">${icon('plus')}</div><h3>Add a new essay</h3><p>Paste any writer’s essay to begin</p></button></div><div class="section-heading"><h2>How training works</h2><span>Gradual removal of support</span></div><div class="flow-grid"><div class="flow-card"><span class="num">01</span><div><h4>Understand</h4><p>Map the argument and collect useful lexical chunks.</p></div></div><div class="flow-card"><span class="num">02</span><div><h4>Reconstruct</h4><p>Write the author’s actual sentences with guided cues.</p></div></div><div class="flow-card"><span class="num">03</span><div><h4>Internalize</h4><p>Fill heavier gaps, then rebuild the whole essay.</p></div></div></div>`;}
+ return `<div class="page-kicker">YOUR WORKSPACE <span class="dot"></span> PERSONAL LEARNING SYSTEM</div><section class="hero"><div class="hero-asterisk">✳</div><div class="hero-grid"><div class="eyebrow">ESSAY MASTERY, SYSTEMATIZED</div><h1>Study the writing. Own the style.</h1><p>Paste any model essay. Work through 12 progressive training stages. Get corrections after each exercise — then retry until the language becomes your own.</p><button class="btn" data-action="addEssay">${icon('plus')} Train a new essay</button></div></section><div class="metric-row"><div class="metric-box"><strong>${es.length.toString().padStart(2,'0')}</strong><small>ESSAYS IN LIBRARY</small></div><div class="metric-box"><strong>${done}</strong><small>EXERCISES FINISHED</small></div><div class="metric-box"><strong>${total}</strong><small>RECORDED ATTEMPTS</small></div></div><div class="section-heading"><h2>Your essay library</h2><span>${es.length} saved</span></div><div class="essay-grid">${es.map(e=>`<div class="essay-tile-wrap"><button type="button" class="essay-tile" data-action="selectEssay" data-id="${esc(e.id)}"><div class="essay-tile-header"><span class="essay-tile-type">IELTS WRITING TASK 2</span></div><h3>${esc(e.title)}</h3><p>${esc(e.question?.slice(0,104)||'Self-study essay')}…</p><div class="essay-tile-bottom"><span>${wordCount(e.essay)} words</span><span>${completedCount(e)} / 15 stages</span></div><div class="progress-track" style="margin-top:10px"><span style="width:${Math.round(100*completedCount(e)/15)}%"></span></div></button><button type="button" class="essay-rename-action" data-action="renameEssay" data-id="${esc(e.id)}" aria-label="Rename ${esc(e.title)}" title="Rename essay">${icon('edit')} Rename</button></div>`).join('')}<button class="essay-tile add-tile" data-action="addEssay"><div class="add-icon">${icon('plus')}</div><h3>Add a new essay</h3><p>Paste any writer’s essay to begin</p></button></div><div class="section-heading"><h2>How training works</h2><span>Gradual removal of support</span></div><div class="flow-grid"><div class="flow-card"><span class="num">01</span><div><h4>Understand</h4><p>Map the argument and collect useful lexical chunks.</p></div></div><div class="flow-card"><span class="num">02</span><div><h4>Reconstruct</h4><p>Write the author’s actual sentences with guided cues.</p></div></div><div class="flow-card"><span class="num">03</span><div><h4>Internalize</h4><p>Fill heavier gaps, then rebuild the whole essay.</p></div></div></div>`;}
 function renderOverview(){const e=selected();if(!e)return renderDashboard();const t=totals(e);return `<div class="page-kicker"><button class="sample-link" data-action="home">Dashboard</button><span class="dot"></span> ESSAY OVERVIEW</div><div class="essay-overview-header"><div><div class="eyebrow">YOUR MODEL ESSAY</div><h1 class="page-title">${esc(e.title)}</h1><p class="page-subtitle">${t.words} words · ${splitEssay(e.essay).paragraphs.length} paragraphs · ${e.plan?'AI-enhanced exercises':'Core recall training ready'}</p></div><div class="btn-group"><button class="btn btn-outline" data-action="renameEssay" data-id="${esc(e.id)}">${icon('edit')} Rename</button><button class="btn btn-outline" data-action="deleteEssay">${icon('trash')} Delete</button></div></div>${e.question?`<div class="essay-prompt">${esc(e.question)}</div>`:''}<div class="page-actions"><div class="btn-group"><button class="btn btn-dark" data-action="stage" data-id="${STAGES.find(s=>!completed(e,s.id))?.id||'1'}">${icon('arrow')} ${t.completed?'Continue training':'Start training'}</button><button class="btn btn-outline" data-action="reader">${icon('book')} Open original essay</button></div><span class="tag">${t.completed} / 15 stages complete</span></div>${showSource?`<div class="study-block"><div class="eyebrow">ORIGINAL MODEL ESSAY</div><div class="essay-source" style="margin-top:13px">${esc(e.essay)}</div></div>`:''}${!e.plan?`<div class="notice">${ai.enabled?`AI is available. This essay was created in offline mode. <button class="sample-link" data-action="enhanceAI">Generate AI exercises now</button>`:'AI-generated analysis questions, true nominalization prompts, and Vietnamese translations become available once the server has an OpenAI API key. Exact-recall stages already work.'}</div>`:''}<div class="section-heading"><h2>Training roadmap</h2><span>15 exercises · 12 stages</span></div><div class="stage-progress-list">${STAGES.map(s=>`<button class="stage-tile" data-action="stage" data-id="${s.id}"><span class="stage-number">${esc(s.number)}</span><span class="stage-tile-info"><strong>${esc(s.title)}</strong><small>${esc(s.short)}</small></span>${completed(e,s.id)?icon('checkCircle','done-icon'):icon('chevronRight')}</button>`).join('')}</div>`;}
 function argumentWorkbookData(e){
  const p=progress(e,'1');
