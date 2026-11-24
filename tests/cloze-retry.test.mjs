@@ -26,7 +26,17 @@ test('Only incorrect original blanks become editable; correct ones appear as pro
  const html=render(c,p);
  assert.deepEqual(incorrectIndices(c,p.session.clozeResults),[2,3]);
  assert.equal((html.match(/class="cloze-inline cloze-retry-blank/g)||[]).length,2);
- assert.match(html,/introductory sentence/);
+ assert.doesNotMatch(html,/introductory sentence/);
+ // A correct blank in a paragraph that also contains a mistake must remain visible as prose.
+ const mixed=progress();
+ mixed.session.clozeResults=[{exact:false},{exact:true},{exact:false}];
+ const mixedC={...c,parts:c.parts.map(part=>part.type==='text'?{...part,text:part.text.replace(' sentence with learning.\n\nThe second paragraph has ',' sentence with learning. The second paragraph has ')}:part)};
+ // Rebuild the fixture with matching offsets after joining paragraphs.
+ const joined=text.replace('learning.\n\nThe second','learning. The second');
+ mixedC.blanks=c.blanks.map(b=>({...b,start:joined.indexOf(b.expected),end:joined.indexOf(b.expected)+b.expected.length}));
+ const mixedHtml=render(mixedC,mixed);
+ assert.match(mixedHtml,/genuine reasoning and insight/);
+ assert.doesNotMatch(mixedHtml,/data-retry-gap="2"/);
  assert.match(html,/data-retry-gap="2"/);
  assert.match(html,/data-retry-gap="3"/);
  assert.doesNotMatch(html,/data-retry-gap="1"/);
