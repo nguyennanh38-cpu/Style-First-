@@ -217,6 +217,21 @@
 .essay-rename-action .lucide{width:13px;height:13px}
 @media(max-width:720px){.essay-rename-action{right:11px;top:10px;padding:7px 10px}}
 
+
+.cloze-retry-panel{margin:22px 0 18px;padding:18px 19px 19px;border:1px solid #bfd0e8;border-radius:14px;background:#f8fbff;box-shadow:0 8px 27px rgba(36,72,118,.045)}
+.cloze-retry-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.cloze-retry-top h3{font-size:19px;letter-spacing:-.45px;margin:4px 0 0;color:#1b2d48}
+.cloze-retry-explainer{font-size:12px;line-height:1.7;color:#61758b;margin:10px 0 12px}
+.cloze-retry-status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#4c6a8e;font-size:11px;font-weight:750;margin-bottom:11px}
+.cloze-retry-passage{margin:0;padding:17px 19px;background:#fff;border:1px solid #dce6f3;border-radius:11px}
+.cloze-retry-paragraph{font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:2.7;margin:0;color:#2c3543;overflow-wrap:anywhere}
+.cloze-retry-paragraph+.cloze-retry-paragraph{margin-top:18px;padding-top:15px;border-top:1px solid #edf1f7}
+.cloze-retry-blank{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+.cloze-retry-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
+.cloze-retry-success{background:#ecf8f1;border:1px solid #bce0c9;border-radius:10px;padding:18px;color:#215c3b}
+.cloze-retry-success p{margin:7px 0 0;font-size:12px;color:#426e55}
+@media(max-width:700px){.cloze-retry-panel{padding:13px}.cloze-retry-passage{padding:12px}.cloze-retry-paragraph{font-size:14px;line-height:2.55}}
+
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -295,6 +310,7 @@
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="/argument-workbook.js"></script>
 <script src="/cloze-feedback.js?v=20261120-case-highlight-2"></script>
+<script src="/cloze-retry.js"></script>
 <script src="/mistake-review.js"></script>
 <script src="/mistake-review-ui.js"></script>
 <script>
@@ -579,7 +595,7 @@ function renderCloze(data,p,st){
  return `<div class="page-actions"><div class="btn-group"><span class="tag">${c.totalWords} words total</span><span class="tag blue">${c.masked} hidden (${Math.round(100*c.masked/c.totalWords)}%)</span></div><span class="tag">${results?'Checked':'Type directly into the passage'}</span></div>
  <div class="eyebrow">COMPLETE THE PASSAGE</div><div class="cloze-passage" aria-label="Fill in each blank directly in the passage">${passage}</div>
  <div class="page-actions" style="margin-top:22px"><div class="footer-hint">Type directly in each blue blank. The label gives the blank number and exact missing word count. Press Tab for the next blank.</div><div class="btn-group"><button class="btn btn-blue" data-action="checkCloze" ${results?'disabled':''}>${icon('check')} ${results?'Attempt checked':'Check all blanks'}</button><button class="btn btn-outline" data-action="redo">${icon('refresh')} Redo</button></div></div>
- ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = minor differences, including list-item reordering without missing words; red = other wording differences. Only the author's original wording appears beside each non-exact answer, with the changed words bolded and underlined. Exact-recall scores are unchanged.</p>`:''}${renderHistory(p)}`;
+ ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = minor differences, including list-item reordering without missing words; red = other wording differences. Only the author's original wording appears beside each non-exact answer, with the changed words bolded and underlined. Exact-recall scores are unchanged.</p>`:''}${results?(window.ClozeRetry?.render(c,p)||''):''}${renderHistory(p)}`;
 }
 function renderHistory(p){if(!p.history.length)return `<div class="attempt-panel"><h3>${icon('history')} Attempt history</h3><p style="font-size:11px;color:#8b95a0;margin:0">Complete an exercise to record your score. Redo it later to compare attempts.</p></div>`;
  return `<div class="attempt-panel"><h3>${icon('history')} Previous attempts</h3>${p.history.slice(-7).reverse().map((a,i)=>`<div class="attempt-row"><span>Attempt ${p.history.length-i} · ${formatTime(a.at)} ${a.legacy?'(earlier exercise set)':a.complete?'':'(partial)'}</span><strong>${a.score===null?'Reviewed':a.score+'%'}</strong></div>`).join('')}</div>`;}
