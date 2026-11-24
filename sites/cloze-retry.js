@@ -129,10 +129,18 @@ function locate(){
 }
 function redraw(){
  if(typeof render==='function'){} // renderer below is separate from the main app's render()
+ const compare=typeof document!=='undefined'?document.querySelector('.cloze-compare'):null;
+ const refTop=compare?.querySelector('.cloze-reference-scroll')?.scrollTop||0;
+ const retryTop=compare?.querySelector('.cloze-retry-passage')?.scrollTop||0;
  if(typeof root.render==='function')root.render();
  else if(typeof globalThis.render==='function')globalThis.render();
  const panel=typeof document!=='undefined'?document.getElementById('clozeRetryPanel'):null;
- panel?.scrollIntoView({block:'start'});
+ const newCompare=panel?.closest('.cloze-compare');
+ if(newCompare){
+  const ref=newCompare.querySelector('.cloze-reference-scroll'),passage=newCompare.querySelector('.cloze-retry-passage');
+  if(ref)ref.scrollTop=refTop;
+  if(passage)passage.scrollTop=retryTop;
+ }else panel?.scrollIntoView({block:'nearest'});
 }
 if(typeof document!=='undefined'){
  document.addEventListener('input',ev=>{
@@ -152,7 +160,7 @@ if(typeof document!=='undefined'){
   else retry(loc.p,loc.cloze);
   if(typeof save==='function')save();
   redraw();
-  if(act==='redoClozeRetry')document.querySelector('#clozeRetryPanel .cloze-retry-input')?.focus();
+  if(act==='redoClozeRetry')document.querySelector('#clozeRetryPanel .cloze-retry-input')?.focus({preventScroll:true});
  });
 }
 root.ClozeRetry={render,check,retry,model,exact,incorrectIndices,activeParagraphs,sourceText};
