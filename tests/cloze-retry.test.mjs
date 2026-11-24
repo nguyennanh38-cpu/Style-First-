@@ -26,7 +26,7 @@ test('Only incorrect original blanks become editable; correct ones appear as pro
  const html=render(c,p);
  assert.deepEqual(incorrectIndices(c,p.session.clozeResults),[2,3]);
  assert.equal((html.match(/class="cloze-inline cloze-retry-blank/g)||[]).length,2);
- assert.doesNotMatch(html,/introductory sentence/);
+ assert.match(html,/introductory sentence/);
  // A correct blank in a paragraph that also contains a mistake must remain visible as prose.
  const mixed=progress();
  mixed.session.clozeResults=[{exact:false},{exact:true},{exact:false}];
@@ -98,6 +98,8 @@ for(const page of ['../index.html','../sites/index.html']){
   assert.match(res.html,/class="cloze-passage cloze-reference-scroll"/);
   assert.ok(res.html.indexOf('Original answers')<res.html.indexOf('Retry incorrect blanks'));
   assert.match(html,/height:calc\(100dvh - 270px\)/);
+  assert.match(html,/\.cloze-compare\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.doesNotMatch(html,/\.workspace:has\(\.cloze-compare\)\s+\.main-content\{max-width:1580px\}/);
   assert.match(html,/\.cloze-compare \.cloze-passage\{flex:1;min-height:0;overflow:auto/);
   const unchecked=vm.runInContext("p.session.clozeResults=null;renderCloze(bundle().stages['5'],p,STAGES.find(x=>x.id==='5'))",sandbox);
   assert.doesNotMatch(unchecked,/class="cloze-compare"/);
