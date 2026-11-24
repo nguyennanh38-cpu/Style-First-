@@ -234,15 +234,15 @@
 
 
 /* Checked Cloze comparison: two independently scrolling reading surfaces. */
-.cloze-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start;margin-top:12px;width:100%;max-width:100%;box-sizing:border-box}
-.cloze-compare-original{min-width:0;border:1px solid #e0e5ed;background:#fff;border-radius:14px;padding:11px;display:flex;flex-direction:column}
+.cloze-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;align-items:start;margin-top:12px;width:100%;max-width:100%;box-sizing:border-box}
+.cloze-compare-original{min-width:0;border:1px solid #e0e5ed;background:#fff;border-radius:8px;padding:5px;display:flex;flex-direction:column}
 .cloze-compare-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
 .cloze-compare-heading h3{font-size:17px;color:#26354a;margin:0;letter-spacing:-.3px}
 .cloze-compare-heading .tag{white-space:nowrap}
-.cloze-compare .cloze-retry-panel{min-width:0;margin:0;padding:11px;display:flex;flex-direction:column}
+.cloze-compare .cloze-retry-panel{min-width:0;margin:0;padding:5px;border-radius:8px;display:flex;flex-direction:column}
 .cloze-compare .cloze-retry-top h3{font-size:17px}
 .cloze-compare .cloze-retry-explainer{margin:6px 0 8px}
-.cloze-compare .cloze-passage{min-width:0;overflow-wrap:anywhere;padding:10px;font-size:14px;line-height:2.05;margin:0;border-radius:9px}
+.cloze-compare .cloze-passage{min-width:0;overflow-wrap:anywhere;padding:6px 7px;font-size:14px;line-height:2.05;margin:0;border-radius:4px}
 .cloze-compare-original>.cloze-passage{background:#fcfdff}
 .cloze-compare .cloze-retry-paragraph{font-size:14px;line-height:2.05}
 .cloze-compare .cloze-inline-input{max-width:100%;min-width:0;flex-shrink:1;font-size:12px}
@@ -253,12 +253,19 @@
 .cloze-compare .cloze-retry-footer .btn{flex:none}
 .cloze-compare .cloze-reference-focus{outline:2px solid #6b8ed0;outline-offset:3px}
 @media(min-width:721px){
+ .workspace:has(.cloze-compare) .main{padding-inline:6px}
+ .workspace:has(.cloze-compare) .main-content{max-width:none}
+ .cloze-compare{gap:2px;background:#cbd5e1;border-radius:8px}
+ .cloze-compare-original{border-right:0;border-top-right-radius:0;border-bottom-right-radius:0}
+ .cloze-compare>.cloze-retry-panel{border-left:0;border-top-left-radius:0;border-bottom-left-radius:0}
+ .cloze-compare .cloze-passage{border:0}
+
  .cloze-compare{align-items:stretch;height:calc(100dvh - 270px);min-height:360px;max-height:850px}
  .cloze-compare-original,.cloze-compare>.cloze-retry-panel{min-height:0;overflow:hidden}
  .cloze-compare .cloze-passage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
  .cloze-compare .cloze-retry-top,.cloze-compare .cloze-retry-status,.cloze-compare .cloze-retry-footer,.cloze-compare-heading{flex-shrink:0}
 }
-@media(max-width:720px){.cloze-compare{grid-template-columns:minmax(0,1fr)}.cloze-compare-original>.cloze-passage{max-height:52vh;overflow:auto;overscroll-behavior:contain}.cloze-compare .cloze-retry-passage{max-height:60vh;overflow:auto;overscroll-behavior:contain}}
+@media(max-width:720px){.cloze-compare{grid-template-columns:minmax(0,1fr);gap:8px}.cloze-compare-original>.cloze-passage{max-height:52vh;overflow:auto;overscroll-behavior:contain}.cloze-compare .cloze-retry-passage{max-height:60vh;overflow:auto;overscroll-behavior:contain}}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
