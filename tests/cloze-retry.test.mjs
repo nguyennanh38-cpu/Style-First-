@@ -94,5 +94,12 @@ for(const page of ['../index.html','../sites/index.html']){
   assert.match(res.html,/Retry incorrect blanks/);
   assert.equal((res.html.match(/class="cloze-inline cloze-retry-blank/g)||[]).length,res.wrong);
   assert.match(res.html,/cloze-summary/);
+  assert.match(res.html,/class="cloze-compare"/);
+  assert.match(res.html,/class="cloze-passage cloze-reference-scroll"/);
+  assert.ok(res.html.indexOf('Original answers')<res.html.indexOf('Retry incorrect blanks'));
+  assert.match(html,/height:calc\(100dvh - 270px\)/);
+  assert.match(html,/\.cloze-compare \.cloze-passage\{flex:1;min-height:0;overflow:auto/);
+  const unchecked=vm.runInContext("p.session.clozeResults=null;renderCloze(bundle().stages['5'],p,STAGES.find(x=>x.id==='5'))",sandbox);
+  assert.doesNotMatch(unchecked,/class="cloze-compare"/);
  });
 }
