@@ -232,6 +232,41 @@
 .cloze-retry-success p{margin:7px 0 0;font-size:12px;color:#426e55}
 @media(max-width:700px){.cloze-retry-panel{padding:13px}.cloze-retry-passage{padding:12px}.cloze-retry-paragraph{font-size:14px;line-height:2.55}}
 
+
+/* Checked Cloze comparison: two independently scrolling reading surfaces. */
+.cloze-compare{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:14px;align-items:start;margin-top:12px}
+.cloze-compare-original{min-width:0;border:1px solid #e0e5ed;background:#fff;border-radius:14px;padding:15px;display:flex;flex-direction:column}
+.cloze-compare-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+.cloze-compare-heading h3{font-size:17px;color:#26354a;margin:0;letter-spacing:-.3px}
+.cloze-compare-heading .tag{white-space:nowrap}
+.cloze-compare .cloze-retry-panel{min-width:0;margin:0;padding:15px;display:flex;flex-direction:column}
+.cloze-compare .cloze-retry-top h3{font-size:17px}
+.cloze-compare .cloze-retry-explainer{margin:6px 0 8px}
+.cloze-compare .cloze-passage{min-width:0;overflow-wrap:anywhere;padding:14px;font-size:15px;line-height:2.15;margin:0;border-radius:9px}
+.cloze-compare-original>.cloze-passage{background:#fcfdff}
+.cloze-compare .cloze-retry-paragraph{line-height:2.15}
+.cloze-compare .cloze-inline-input{max-width:100%;min-width:0;flex-shrink:1}
+.cloze-compare .cloze-inline{max-width:100%;box-sizing:border-box}
+.cloze-compare .cloze-inline-diff{max-width:100%;overflow-wrap:anywhere}
+.cloze-compare .cloze-retry-footer{margin-top:10px}
+.cloze-compare .cloze-retry-footer .footer-hint{font-size:10px;flex:1;min-width:110px}
+.cloze-compare .cloze-retry-footer .btn{flex:none}
+.cloze-compare .cloze-reference-focus{outline:2px solid #6b8ed0;outline-offset:3px}
+@media(min-width:1051px){
+ .workspace:has(.cloze-compare){grid-template-columns:200px minmax(0,1fr)}
+ .workspace:has(.cloze-compare) .inspector{display:none}
+ .workspace:has(.cloze-compare) .main{padding:16px clamp(14px,1.6vw,28px) 50px}
+ .workspace:has(.cloze-compare) .main-content{max-width:1580px}
+ .workspace:has(.cloze-compare) .stage-top .page-title{font-size:clamp(25px,2vw,33px)}
+ .workspace:has(.cloze-compare) .stage-top .page-subtitle{margin-bottom:4px}
+ .workspace:has(.cloze-compare) .stage-actions{margin:8px 0 10px}
+ .workspace:has(.cloze-compare) .page-actions{margin:8px 0}
+ .cloze-compare{align-items:stretch;height:calc(100dvh - 270px);min-height:360px;max-height:850px}
+ .cloze-compare-original,.cloze-compare>.cloze-retry-panel{min-height:0;overflow:hidden}
+ .cloze-compare .cloze-passage{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+ .cloze-compare .cloze-retry-top,.cloze-compare .cloze-retry-status,.cloze-compare .cloze-retry-footer,.cloze-compare-heading{flex-shrink:0}
+}
+@media(max-width:1050px){.cloze-compare{grid-template-columns:minmax(0,1fr)}.cloze-compare-original>.cloze-passage{max-height:52vh;overflow:auto;overscroll-behavior:contain}.cloze-compare .cloze-retry-passage{max-height:60vh;overflow:auto;overscroll-behavior:contain}}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -592,10 +627,23 @@ function renderCloze(data,p,st){
  }).join('');
  const score=results?results.filter(r=>r.exact).length:0;
  const percentage=results?Math.round(100*score/c.blanks.length):0;
+ const retryPanel=results?(window.ClozeRetry?.render(c,p)||''):'';
+ if(retryPanel){
+  return `<div class="page-actions"><div class="btn-group"><span class="tag">${c.totalWords} words total</span><span class="tag blue">${c.masked} hidden (${Math.round(100*c.masked/c.totalWords)}%)</span></div><span class="tag">Checked</span></div>
+  <div class="cloze-compare" data-stage="${esc(st.id)}" aria-label="Compare checked answers and retry incorrect blanks">
+   <section class="cloze-compare-original" aria-label="Original checked answers">
+    <div class="cloze-compare-heading"><h3>Original answers</h3><span class="tag">${score}/${c.blanks.length} · ${percentage}% exact</span></div>
+    <div class="cloze-passage cloze-reference-scroll" tabindex="0" aria-label="Original checked passage">${passage}</div>
+   </section>
+   ${retryPanel}
+  </div>
+  <div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div>
+  <p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = minor differences; red = other wording differences. Changed wording is bolded and underlined. Exact-recall scores are unchanged.</p>${renderHistory(p)}`;
+ }
  return `<div class="page-actions"><div class="btn-group"><span class="tag">${c.totalWords} words total</span><span class="tag blue">${c.masked} hidden (${Math.round(100*c.masked/c.totalWords)}%)</span></div><span class="tag">${results?'Checked':'Type directly into the passage'}</span></div>
  <div class="eyebrow">COMPLETE THE PASSAGE</div><div class="cloze-passage" aria-label="Fill in each blank directly in the passage">${passage}</div>
  <div class="page-actions" style="margin-top:22px"><div class="footer-hint">Type directly in each blue blank. The label gives the blank number and exact missing word count. Press Tab for the next blank.</div><div class="btn-group"><button class="btn btn-blue" data-action="checkCloze" ${results?'disabled':''}>${icon('check')} ${results?'Attempt checked':'Check all blanks'}</button><button class="btn btn-outline" data-action="redo">${icon('refresh')} Redo</button></div></div>
- ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = minor differences, including list-item reordering without missing words; red = other wording differences. Only the author's original wording appears beside each non-exact answer, with the changed words bolded and underlined. Exact-recall scores are unchanged.</p>`:''}${results?(window.ClozeRetry?.render(c,p)||''):''}${renderHistory(p)}`;
+ ${results?`<div class="cloze-summary"><div class="big-grade">${score}/${c.blanks.length}</div><div><strong>${percentage}% exact</strong><p>${c.blanks.length-score} expressions to revisit.</p></div><div class="progress-track"><span style="width:${percentage}%"></span></div></div><p style="font-size:11px;color:#7e8a98;line-height:1.8">Green = exact match; yellow = minor differences, including list-item reordering without missing words; red = other wording differences. Only the author's original wording appears beside each non-exact answer, with the changed words bolded and underlined. Exact-recall scores are unchanged.</p>`:''}${renderHistory(p)}`;
 }
 function renderHistory(p){if(!p.history.length)return `<div class="attempt-panel"><h3>${icon('history')} Attempt history</h3><p style="font-size:11px;color:#8b95a0;margin:0">Complete an exercise to record your score. Redo it later to compare attempts.</p></div>`;
  return `<div class="attempt-panel"><h3>${icon('history')} Previous attempts</h3>${p.history.slice(-7).reverse().map((a,i)=>`<div class="attempt-row"><span>Attempt ${p.history.length-i} · ${formatTime(a.at)} ${a.legacy?'(earlier exercise set)':a.complete?'':'(partial)'}</span><strong>${a.score===null?'Reviewed':a.score+'%'}</strong></div>`).join('')}</div>`;}
