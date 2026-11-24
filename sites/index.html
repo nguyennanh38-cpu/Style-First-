@@ -391,6 +391,77 @@
  .feedback-body{padding:12px}
  .attempt-panel{margin-top:12px;padding:12px}
 }
+
+/* Readability-first density: use spare area for larger, more informative content. */
+@media(min-width:721px){
+ .workspace:has(.hero){grid-template-columns:232px minmax(0,1fr) 248px}
+ .workspace:has(.hero) .main{padding:18px 14px 28px}
+ .hero{padding:20px 22px}
+ .hero h1{font-size:clamp(27px,2.2vw,34px)}
+ .hero p{font-size:15px;line-height:1.55}
+ .hero .eyebrow,.page-kicker{font-size:11px}
+ .hero .btn,.btn{font-size:14px}
+ .metric-box{padding:15px 17px}
+ .metric-box strong{font-size:30px}
+ .metric-box small{font-size:12px;color:#59687a}
+ .section-heading h2{font-size:20px}
+ .section-heading span{font-size:13px}
+ .essay-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+ .essay-tile{min-height:clamp(174px,22vh,260px);padding:16px}
+ .essay-tile h3{font-size:19px;line-height:1.35;margin:11px 0 8px;overflow-wrap:anywhere}
+ .essay-tile p{font-size:14px;line-height:1.6;color:#59687a;margin-bottom:12px;overflow-wrap:anywhere}
+ .essay-tile-type{font-size:10px;letter-spacing:.6px;color:#65748a}
+ .essay-tile-bottom{font-size:13px;color:#59687a;gap:6px;flex-wrap:wrap}
+ .essay-tile .progress-track{height:8px}
+ .essay-tile-wrap .essay-tile-header{padding-right:72px}
+ .essay-rename-action{font-size:12px}
+ .flow-card{padding:12px}
+ .flow-card h4{font-size:15px}
+ .flow-card p{font-size:13px;line-height:1.55;color:#59687a}
+ .flow-card .num{font-size:12px}
+ .nav-home,.nav-utility,.library-entry{font-size:13px}
+ .stage-text strong{font-size:13px;white-space:normal;line-height:1.3;overflow-wrap:anywhere}
+ .stage-text small{font-size:11px;color:#667386;line-height:1.3}
+ .sidebar-caption,.side-group-heading,.group-tag{font-size:10px}
+ .library-entry span{white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+ .library-entry .tiny-progress{white-space:nowrap;font-size:11px}
+ .inspector-title{font-size:17px}
+ .mini-stat{font-size:12px;line-height:1.35}
+ .mini-stat strong{font-size:13px}
+ .mastery-ring{width:108px;height:108px}
+ .mastery-ring-inner{width:92px;height:92px}
+ .mastery-ring strong{font-size:28px}
+ .quote-card p{font-size:14px}
+ .page-subtitle,.notice,.hint-box{font-size:14px}
+ .task-question{font-size:18px}
+ .answer-box,.argument-textarea,.argument-unified .argument-textarea{font-size:15px}
+ .feedback-body p,.feedback-issue,.feedback-label{font-size:14px}
+ .reading-paragraph p,.cloze-passage,.cloze-compare .cloze-passage,.cloze-compare .cloze-retry-paragraph{font-size:16px;line-height:1.95}
+ .cloze-inline-input,.cloze-compare .cloze-inline-input{font-size:14px}
+ .cloze-inline-diff,.cloze-inline-label{font-size:12px}
+ .cloze-retry-explainer,.cloze-retry-status{font-size:13px}
+ .argument-field-label,.argument-unified .argument-field-label{font-size:13px}
+ .argument-card-hint,.argument-notebook-intro,.argument-field-tip{font-size:13px}
+ .reading-task-prompt p{font-size:14px}
+}
+@media(min-width:721px) and (max-width:1250px){
+ .essay-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(min-width:721px) and (max-width:1050px){
+ .workspace:has(.hero){grid-template-columns:190px minmax(0,1fr)}
+ .flow-grid{grid-template-columns:1fr}
+}
+@media(min-width:721px) and (max-width:850px){
+ .essay-grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+ .essay-tile h3{font-size:18px}
+ .essay-tile p,.hero p{font-size:14px;color:inherit}
+ .essay-tile p{color:#59687a}
+ .hero p{color:#bac4d3}
+ .essay-tile-bottom,.flow-card p{font-size:13px}
+ .cloze-passage,.cloze-compare .cloze-passage,.cloze-compare .cloze-retry-paragraph{font-size:15px}
+}
 </style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
@@ -653,7 +724,7 @@ function side(){const e=selected();D('librarySide').innerHTML=db.essays.map(x=>`
 function inspector(){let e=selected();const t=e?totals(e):{completed:0,attempts:0,words:0},percent=Math.round(100*t.completed/STAGES.length);D('inspectorContent').innerHTML=`<div class="inspector-wrap"><div class="inspector-label">MASTERY TRACKER</div><h3 class="inspector-title">Your writing practice</h3><div class="inspector-card"><div class="mastery-ring" style="--progress:${percent}%"><div class="mastery-ring-inner"><strong>${percent}%</strong><small>COMPLETED</small></div></div><div class="mini-stat"><span>Exercises completed</span><strong>${t.completed} / 15</strong></div><div class="mini-stat"><span>Saved attempts</span><strong>${t.attempts}</strong></div><div class="mini-stat"><span>Essay length</span><strong>${t.words} words</strong></div></div><div class="inspector-label">THE METHOD</div><div class="inspector-card"><div class="mini-stat"><span>01 — Understand</span><strong>Logic + lexicon</strong></div><div class="mini-stat"><span>02 — Reconstruct</span><strong>Exact wording</strong></div><div class="mini-stat"><span>03 — Remember</span><strong>20 / 40 / 60%</strong></div><div class="mini-stat"><span>04 — Master</span><strong>Full essay</strong></div></div><div class="quote-card"><div class="quote-mark">“</div><p>The goal isn’t to write something similar. It’s to learn what makes this writer’s choices work.</p><small>STYLE FIRST · STUDY PRINCIPLE</small></div></div>`;}
 function render(){header();side();inspector();D('workspace').classList.toggle('reading-layout',mode==='reader'||mode==='stage'&&['1','2'].includes(stageId));const node=D('mainContent');node.className='main-content';if(mode==='dashboard')node.innerHTML=renderDashboard();else if(mode==='overview')node.innerHTML=renderOverview();else if(mode==='reader')node.innerHTML=renderReader();else node.innerHTML=renderStage();const scroller=D('readingSourceScroll');if(scroller)scroller.scrollTop=mode==='reader'?readerSourceTop:stageSourceTop;}
 function renderDashboard(){let es=db.essays;const total=es.reduce((n,e)=>n+Object.values(e.progress||{}).reduce((a,p)=>a+(p.history?.length||0),0),0);const done=es.reduce((n,e)=>n+completedCount(e),0);
- return `<div class="page-kicker">YOUR WORKSPACE <span class="dot"></span> PERSONAL LEARNING SYSTEM</div><section class="hero"><div class="hero-asterisk">✳</div><div class="hero-grid"><div class="eyebrow">ESSAY MASTERY, SYSTEMATIZED</div><h1>Study the writing. Own the style.</h1><p>Paste any model essay. Work through 12 progressive training stages. Get corrections after each exercise — then retry until the language becomes your own.</p><button class="btn" data-action="addEssay">${icon('plus')} Train a new essay</button></div></section><div class="metric-row"><div class="metric-box"><strong>${es.length.toString().padStart(2,'0')}</strong><small>ESSAYS IN LIBRARY</small></div><div class="metric-box"><strong>${done}</strong><small>EXERCISES FINISHED</small></div><div class="metric-box"><strong>${total}</strong><small>RECORDED ATTEMPTS</small></div></div><div class="section-heading"><h2>Your essay library</h2><span>${es.length} saved</span></div><div class="essay-grid">${es.map(e=>`<div class="essay-tile-wrap"><button type="button" class="essay-tile" data-action="selectEssay" data-id="${esc(e.id)}"><div class="essay-tile-header"><span class="essay-tile-type">IELTS WRITING TASK 2</span></div><h3>${esc(e.title)}</h3><p>${esc(e.question?.slice(0,104)||'Self-study essay')}…</p><div class="essay-tile-bottom"><span>${wordCount(e.essay)} words</span><span>${completedCount(e)} / 15 stages</span></div><div class="progress-track" style="margin-top:10px"><span style="width:${Math.round(100*completedCount(e)/15)}%"></span></div></button><button type="button" class="essay-rename-action" data-action="renameEssay" data-id="${esc(e.id)}" aria-label="Rename ${esc(e.title)}" title="Rename essay">${icon('edit')} Rename</button></div>`).join('')}<button class="essay-tile add-tile" data-action="addEssay"><div class="add-icon">${icon('plus')}</div><h3>Add a new essay</h3><p>Paste any writer’s essay to begin</p></button></div><div class="section-heading"><h2>How training works</h2><span>Gradual removal of support</span></div><div class="flow-grid"><div class="flow-card"><span class="num">01</span><div><h4>Understand</h4><p>Map the argument and collect useful lexical chunks.</p></div></div><div class="flow-card"><span class="num">02</span><div><h4>Reconstruct</h4><p>Write the author’s actual sentences with guided cues.</p></div></div><div class="flow-card"><span class="num">03</span><div><h4>Internalize</h4><p>Fill heavier gaps, then rebuild the whole essay.</p></div></div></div>`;}
+ return `<div class="page-kicker">YOUR WORKSPACE <span class="dot"></span> PERSONAL LEARNING SYSTEM</div><section class="hero"><div class="hero-asterisk">✳</div><div class="hero-grid"><div class="eyebrow">ESSAY MASTERY, SYSTEMATIZED</div><h1>Study the writing. Own the style.</h1><p>Paste any model essay. Work through 12 progressive training stages. Get corrections after each exercise — then retry until the language becomes your own.</p><button class="btn" data-action="addEssay">${icon('plus')} Train a new essay</button></div></section><div class="metric-row"><div class="metric-box"><strong>${es.length.toString().padStart(2,'0')}</strong><small>ESSAYS IN LIBRARY</small></div><div class="metric-box"><strong>${done}</strong><small>EXERCISES FINISHED</small></div><div class="metric-box"><strong>${total}</strong><small>RECORDED ATTEMPTS</small></div></div><div class="section-heading"><h2>Your essay library</h2><span>${es.length} saved</span></div><div class="essay-grid">${es.map(e=>`<div class="essay-tile-wrap"><button type="button" class="essay-tile" data-action="selectEssay" data-id="${esc(e.id)}"><div class="essay-tile-header"><span class="essay-tile-type">IELTS WRITING TASK 2</span></div><h3>${esc(e.title)}</h3><p>${esc(e.question||'Self-study essay')}</p><div class="essay-tile-bottom"><span>${wordCount(e.essay)} words</span><span>${completedCount(e)} / 15 stages</span></div><div class="progress-track" style="margin-top:10px"><span style="width:${Math.round(100*completedCount(e)/15)}%"></span></div></button><button type="button" class="essay-rename-action" data-action="renameEssay" data-id="${esc(e.id)}" aria-label="Rename ${esc(e.title)}" title="Rename essay">${icon('edit')} Rename</button></div>`).join('')}<button class="essay-tile add-tile" data-action="addEssay"><div class="add-icon">${icon('plus')}</div><h3>Add a new essay</h3><p>Paste any writer’s essay to begin</p></button></div><div class="section-heading"><h2>How training works</h2><span>Gradual removal of support</span></div><div class="flow-grid"><div class="flow-card"><span class="num">01</span><div><h4>Understand</h4><p>Map the argument and collect useful lexical chunks.</p></div></div><div class="flow-card"><span class="num">02</span><div><h4>Reconstruct</h4><p>Write the author’s actual sentences with guided cues.</p></div></div><div class="flow-card"><span class="num">03</span><div><h4>Internalize</h4><p>Fill heavier gaps, then rebuild the whole essay.</p></div></div></div>`;}
 function renderOverview(){const e=selected();if(!e)return renderDashboard();const t=totals(e);return `<div class="page-kicker"><button class="sample-link" data-action="home">Dashboard</button><span class="dot"></span> ESSAY OVERVIEW</div><div class="essay-overview-header"><div><div class="eyebrow">YOUR MODEL ESSAY</div><h1 class="page-title">${esc(e.title)}</h1><p class="page-subtitle">${t.words} words · ${splitEssay(e.essay).paragraphs.length} paragraphs · ${e.plan?'AI-enhanced exercises':'Core recall training ready'}</p></div><div class="btn-group"><button class="btn btn-outline" data-action="renameEssay" data-id="${esc(e.id)}">${icon('edit')} Rename</button><button class="btn btn-outline" data-action="deleteEssay">${icon('trash')} Delete</button></div></div>${e.question?`<div class="essay-prompt">${esc(e.question)}</div>`:''}<div class="page-actions"><div class="btn-group"><button class="btn btn-dark" data-action="stage" data-id="${STAGES.find(s=>!completed(e,s.id))?.id||'1'}">${icon('arrow')} ${t.completed?'Continue training':'Start training'}</button><button class="btn btn-outline" data-action="reader">${icon('book')} Open original essay</button></div><span class="tag">${t.completed} / 15 stages complete</span></div>${showSource?`<div class="study-block"><div class="eyebrow">ORIGINAL MODEL ESSAY</div><div class="essay-source" style="margin-top:13px">${esc(e.essay)}</div></div>`:''}${!e.plan?`<div class="notice">${ai.enabled?`AI is available. This essay was created in offline mode. <button class="sample-link" data-action="enhanceAI">Generate AI exercises now</button>`:'AI-generated analysis questions, true nominalization prompts, and Vietnamese translations become available once the server has an OpenAI API key. Exact-recall stages already work.'}</div>`:''}<div class="section-heading"><h2>Training roadmap</h2><span>15 exercises · 12 stages</span></div><div class="stage-progress-list">${STAGES.map(s=>`<button class="stage-tile" data-action="stage" data-id="${s.id}"><span class="stage-number">${esc(s.number)}</span><span class="stage-tile-info"><strong>${esc(s.title)}</strong><small>${esc(s.short)}</small></span>${completed(e,s.id)?icon('checkCircle','done-icon'):icon('chevronRight')}</button>`).join('')}</div>`;}
 function argumentWorkbookData(e){
  const p=progress(e,'1');
