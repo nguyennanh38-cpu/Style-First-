@@ -68,6 +68,18 @@ function originAllowed(req){
   try {const u=new URL(origin),host=req.headers.host;return u.host===host&&(u.protocol==='https:'||(u.protocol==='http:'&&/^(localhost|127\.0\.0\.1)(:|$)/.test(host)));}catch{return false;}
 }
 const cleanStr=(x,n)=>String(x||'').slice(0,n);
+
+function mergeFindings(a,b){
+ const byId=new Map();
+ for(const n of [...(Array.isArray(a)?a:[]),...(Array.isArray(b)?b:[])]){
+  if(!n||typeof n.id!=='string'||!n.id||n.id.length>120||typeof n.text!=='string')continue;
+  const clean={id:n.id,text:n.deleted?'':n.text.slice(0,5000),createdAt:cleanStr(n.createdAt,80),updatedAt:cleanStr(n.updatedAt,80),...(n.deleted?{deleted:true}:{})};
+  const prev=byId.get(clean.id);
+  if(!prev||String(clean.updatedAt)>String(prev.updatedAt)||(clean.updatedAt===prev.updatedAt&&clean.deleted&&!prev.deleted))byId.set(clean.id,clean);
+ }
+ return [...byId.values()];
+}
+
 function validateState(x){
   if(!x||x.version!==1||!Array.isArray(x.essays)||x.essays.length>100)throw err(400,'Invalid or oversized workbook.');
   const essays=x.essays.map(e=>{
@@ -75,7 +87,7 @@ function validateState(x){
     const progress=e.progress&&typeof e.progress==='object'&&!Array.isArray(e.progress)?e.progress:{};
     if(Object.keys(progress).length>30)throw err(400,'Too many stages.');
     return {id:cleanStr(e.id,120),title:cleanStr(e.title,350),question:cleanStr(e.question,4500),
-      essay:e.essay,plan:e.plan||null,createdAt:e.createdAt||null,updatedAt:e.updatedAt||null,progress, demo:!!e.demo};
+      essay:e.essay,plan:e.plan||null,createdAt:e.createdAt||null,updatedAt:e.updatedAt||null,progress, ...(Array.isArray(e.findings)?{findings:mergeFindings([],e.findings)}:{}), demo:!!e.demo};
   });
   return {version:1,essays,selectedId:typeof x.selectedId==='string'?x.selectedId:null,
     deletedIds:Array.isArray(x.deletedIds)?x.deletedIds.filter(y=>typeof y==='string').slice(-500):[]};
@@ -140,7 +152,7 @@ export function mergeStates(a,b){
     const timeB=Date.parse(e.updatedAt||e.createdAt||'')||0;
     const latest=timeB>timeA?e:previous;
     merged.set(e.id,{...previous,...latest,plan:latest.plan||previous.plan||e.plan||null,
-      progress:mergeProgress(previous.progress,e.progress)});
+      progress:mergeProgress(previous.progress,e.progress), ...(previous.findings||e.findings?{findings:mergeFindings(previous.findings,e.findings)}:{})});
   }
   const essays=[...merged.values()].sort((x,y)=>(Date.parse(y.createdAt||'')||0)-(Date.parse(x.createdAt||'')||0));
   const selected=essays.find(x=>x.id===right.selectedId)?right.selectedId:
