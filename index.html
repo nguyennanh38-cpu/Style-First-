@@ -1066,11 +1066,12 @@ function retryTask(){const e=selected(),p=progress(e,stageId),i=p.session.curren
 const SHORTCUT_STORAGE='style-first-keyboard-shortcuts-v1';
 const SHORTCUT_GROUPS=[
  ['Blank navigation',[['nextBlank','Next blank'],['previousBlank','Previous blank']]],
+ ['Page scrolling',[['pageUp','Scroll entire page up'],['pageDown','Scroll entire page down']]],
  ['Exercise actions',[['check','Check answers / corrections'],['nextTask','Next question'],['prevTask','Previous question'],['nextStage','Next exercise'],['prevStage','Previous exercise'],['retryMistakes','Retry incorrect answers'],['redo','Redo entire exercise'],['original','Open original essay'],['returnExercise','Return to exercise'],['focusAnswer','Focus answer field'],['dashboard','Open dashboard'],['save','Save progress'],['settings','Open keyboard shortcuts']]],
  ['Text editing',[['selectAll','Select all text in answer'],['undoText','Undo text edit'],['redoText','Redo text edit'],['copy','Copy selection'],['cut','Cut selection'],['paste','Paste text']]]
 ];
 const SHORTCUT_IDS=SHORTCUT_GROUPS.flatMap(g=>g[1].map(a=>a[0]));
-const SHORTCUT_DEFAULTS={nextBlank:'Tab',previousBlank:'Shift+Tab'};
+const SHORTCUT_DEFAULTS={nextBlank:'Tab',previousBlank:'Shift+Tab',pageUp:'Shift+PageUp',pageDown:'Shift+PageDown'};
 let shortcutRecording=null,shortcutBindings=null;
 function getShortcuts(){
  if(shortcutBindings)return shortcutBindings;
@@ -1087,11 +1088,12 @@ function shortcutChord(ev){
 function shortcutAllowed(chord,id){
  if(!chord||chord==='Escape')return false;
  if(chord==='Tab'||chord==='Shift+Tab')return id==='nextBlank'||id==='previousBlank';
+ if(chord==='Shift+PageUp'||chord==='Shift+PageDown')return id==='pageUp'||id==='pageDown';
  return /(?:^|\+)(Ctrl|Cmd|Alt)\+/.test(chord)||/^F(?:[1-9]|1[0-2])$/.test(chord);
 }
 function shortcutDisplay(id){return getShortcuts()[id]?.replace(/\+/g,' + ')||'Unassigned';}
 function shortcutTabHTML(){
- return '<div class="shortcut-intro">Choose a shortcut, then press the desired keys. Only Tab and Shift + Tab are assigned initially. Standard browser and OS text-editing shortcuts still work when not overridden. Shortcuts are saved on this device.</div>'+
+ return '<div class="shortcut-intro">Choose a shortcut, then press the desired keys. Tab, Shift + Tab, Shift + Page Up and Shift + Page Down are assigned initially. Standard browser and OS text-editing shortcuts still work when not overridden. Shortcuts are saved on this device.</div>'+
  SHORTCUT_GROUPS.map(([group,items])=>'<section class="shortcut-group"><h3>'+esc(group)+'</h3>'+items.map(([id,label])=>'<div class="shortcut-row"><span>'+esc(label)+'</span><button type="button" class="btn btn-outline shortcut-key" data-shortcut-record="'+id+'" aria-label="Set shortcut for '+esc(label)+'">'+esc(shortcutDisplay(id))+'</button><button type="button" class="btn btn-ghost shortcut-clear" data-shortcut-clear="'+id+'" aria-label="Clear shortcut for '+esc(label)+'" '+(!getShortcuts()[id]?'disabled':'')+'>Clear</button></div>').join('')+'</section>').join('')+
  '<p class="shortcut-intro">Some browser or operating-system shortcuts cannot be overridden. Blank navigation skips disabled answers and stays within the current exercise until the first or last blank; Tab can then leave the fields normally.</p><button type="button" class="btn btn-outline" data-shortcut-reset>Reset defaults</button>';
 }
@@ -1120,6 +1122,12 @@ function shortcutClick(action,scope=document){
 function runShortcut(id,target){
  const main=D('mainContent'),editing=target?.matches?.('input:not([type=button]):not([type=checkbox]),textarea,[contenteditable=true]')&&!target.disabled&&!target.readOnly;
  if(id==='nextBlank'||id==='previousBlank')return moveBlank(target,id==='nextBlank'?1:-1);
+ if(id==='pageUp'||id==='pageDown'){
+  const headerHeight=document.querySelector('.topbar')?.getBoundingClientRect().height||0;
+  const distance=Math.max(80,window.innerHeight-headerHeight-32);
+  window.scrollBy({top:distance*(id==='pageUp'?-1:1),behavior:'instant'});
+  return true;
+ }
  if(id==='settings'){settings();openModal('settingsModal');showShortcutTab('keys');return true;}
  if(id==='dashboard'){setMode('dashboard');return true;}
  if(id==='save'){save();toast('Progress saved.');return true;}
@@ -1156,13 +1164,14 @@ function shortcutKeydown(ev){
   const id=shortcutRecording;
   if(ev.key==='Escape'){shortcutRecording=null;refreshShortcutTab();return;}
   const chord=shortcutChord(ev);if(!chord)return;
-  if(!shortcutAllowed(chord,id)){toast('Use Ctrl, Cmd or Alt with a key, or a function key. Tab is reserved for blank navigation.');return;}
+  if(!shortcutAllowed(chord,id)){toast('Use Ctrl, Cmd or Alt with a key, or a function key. Tab and Shift + Page Up/Down are reserved for navigation.');return;}
   const bindings=getShortcuts(),other=SHORTCUT_IDS.find(x=>x!==id&&bindings[x]===chord);
   if(other){toast('That shortcut is already assigned. Clear it first.');return;}
   bindings[id]=chord;persistShortcuts();shortcutRecording=null;refreshShortcutTab();return;
  }
- if(ev.defaultPrevented||ev.repeat||document.querySelector('.modal-backdrop:not([hidden])'))return;
+ if(ev.defaultPrevented||document.querySelector('.modal-backdrop:not([hidden])'))return;
  const chord=shortcutChord(ev),id=SHORTCUT_IDS.find(x=>getShortcuts()[x]&&getShortcuts()[x]===chord);
+ if(ev.repeat&&id!=='pageUp'&&id!=='pageDown')return;
  if(id&&runShortcut(id,ev.target)){ev.preventDefault();ev.stopImmediatePropagation();}
 }
 function shortcutSettingsClick(ev){
