@@ -631,7 +631,7 @@ button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoC
 .findings-note-meta .btn{font-size:14px;padding:5px 9px}
 .finding-editor{width:100%;min-height:180px;font:inherit;font-size:19px;line-height:1.5;padding:12px;resize:vertical;border:1px solid #a9bad3;border-radius:8px}
 .finding-empty{padding:8px;font-size:18px;line-height:1.5;color:#617085}
-.quick-finding-form{flex:0 0 auto;min-width:0;padding:4px 3px 8px}.quick-finding-hint{display:block;font-size:15px;font-weight:800;color:#17458e;margin-bottom:5px}.quick-finding-form textarea{display:block;width:100%;box-sizing:border-box;min-height:76px;max-height:150px;resize:vertical;border:1.5px solid #9bb6dd;border-radius:8px;padding:9px 10px;background:#fff;font:inherit;font-size:20px;line-height:1.4;color:#203451}.quick-finding-form textarea:focus{outline:2px solid #4277cb;outline-offset:1px}.quick-finding-help{font-size:13px;line-height:1.35;color:#617085;display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:5px}.quick-finding-help .btn{font-size:14px;padding:4px 8px;min-height:30px}</style>
+.quick-finding-form{flex:0 0 auto;min-width:0;padding:4px 3px 8px}.quick-finding-hint{display:block;font-size:15px;font-weight:800;color:#17458e;margin-bottom:5px}.quick-finding-form textarea{display:block;width:100%;box-sizing:border-box;min-height:76px;max-height:150px;resize:vertical;border:1.5px solid #9bb6dd;border-radius:8px;padding:9px 10px;background:#fff;font:inherit;font-size:20px;line-height:1.4;color:#203451}.quick-finding-form textarea:focus{outline:2px solid #4277cb;outline-offset:1px}.quick-finding-help{font-size:13px;line-height:1.35;color:#617085;display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:5px}.quick-finding-help .btn{font-size:14px;padding:4px 8px;min-height:30px}.legacy-finding-label{display:block;color:#617085;font-size:13px;font-weight:700;white-space:normal}.findings-note-meta .legacy-finding-label{display:inline-block}</style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
 <body>
@@ -1318,7 +1318,20 @@ function shortcutSettingsClick(ev){
 let findingEdit=null;
 const quickFindingDrafts=new Map();
 function activeFindings(e){
- return (Array.isArray(e?.findings)?e.findings:[]).filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string'&&!n.deleted).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+ const notes=(Array.isArray(e?.findings)?e.findings:[]).filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string'&&!n.deleted);
+ // Include the original Argument anatomy notebook without changing saved data.
+ const wb=e?.progress?.['1']?.argumentWorkbook;
+ const legacy=wb?.drafts?.['insights.global'];
+ const normalize=t=>t.trim().replace(/\s+/g,' ');
+ if(typeof legacy==='string'&&legacy.trim()&&!notes.some(n=>normalize(n.text)===normalize(legacy))){
+  notes.push({id:'legacy-argument-insights',text:legacy,createdAt:wb.updatedAt||e.createdAt||'',legacyNotebook:true});
+ }
+ return notes.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+}
+function findingActions(e,n,side=false){
+ if(n.legacyNotebook)return '<span class="legacy-finding-label">Argument anatomy notebook</span><button class="'+(side?'':'btn btn-outline')+'" data-action="openLegacyFinding" data-id="'+esc(e.id)+'">Open original notes</button>';
+ const attrs=' data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'"';
+ return '<button class="'+(side?'':'btn btn-outline')+'" data-action="editFinding"'+attrs+'>Edit</button>'+(side?'':'<button class="btn btn-ghost" data-action="deleteFinding"'+attrs+'>Delete</button>');
 }
 function findingsCount(){return db.essays.reduce((n,e)=>n+activeFindings(e).length,0);}
 function findingSource(e){return '<button class="findings-source-link" data-action="selectEssay" data-id="'+esc(e.id)+'">'+esc(e.title)+'</button>';}
@@ -1329,14 +1342,14 @@ function renderFindingSide(){
  const input=D('quickFindingInput');if(input){const next=e?.id||'';if(input.dataset.essay!==next){if(input.dataset.essay)quickFindingDrafts.set(input.dataset.essay,input.value);input.dataset.essay=next;input.value=quickFindingDrafts.get(next)||'';}input.disabled=!e;D('quickFindingSave').disabled=!e||!input.value.trim();}refreshFindingHint();
  D('findingAllSide').textContent='All findings ('+findingsCount()+') →';
  D('navFindings').classList.toggle('active',mode==='findings');
- list.innerHTML=notes.length?notes.map(n=>'<div class="finding-side-card">'+esc(n.text)+'<button data-action="editFinding" data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'">Edit</button></div>').join(''):'<p class="finding-empty">No findings saved for this essay yet.</p>';
+ list.innerHTML=notes.length?notes.map(n=>'<div class="finding-side-card">'+esc(n.text)+findingActions(e,n,true)+'</div>').join(''):'<p class="finding-empty">No findings saved for this essay yet.</p>';
  list.scrollTop=top;
 }
 function renderFindings(){
  const total=findingsCount();
  const groups=db.essays.filter(e=>activeFindings(e).length);
  return '<header class="findings-toolbar"><div><h1 class="page-title">Interesting findings</h1><p class="page-subtitle">'+total+' saved · '+groups.length+' source essays</p></div><button class="btn btn-blue" data-action="addFinding" '+(!selected()?'disabled':'')+'>+ Add finding</button></header>'+
- (groups.length?groups.map(e=>'<section class="findings-group"><div class="findings-group-head">'+findingSource(e)+'<span class="tag">'+activeFindings(e).length+' findings</span></div>'+activeFindings(e).map(n=>'<article class="findings-note"><p class="findings-note-text">'+esc(n.text)+'</p><div class="findings-note-meta"><span>Source: '+esc(e.title)+'</span><button class="btn btn-outline" data-action="editFinding" data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'">Edit</button><button class="btn btn-ghost" data-action="deleteFinding" data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'">Delete</button></div></article>').join('')+'</section>').join(''):'<div class="study-block">No findings yet. Add your first observation from an essay using the sidebar.</div>');
+ (groups.length?groups.map(e=>'<section class="findings-group"><div class="findings-group-head">'+findingSource(e)+'<span class="tag">'+activeFindings(e).length+' findings</span></div>'+activeFindings(e).map(n=>'<article class="findings-note"><p class="findings-note-text">'+esc(n.text)+'</p><div class="findings-note-meta"><span>Source: '+esc(e.title)+'</span>'+findingActions(e,n)+'</div></article>').join('')+'</section>').join(''):'<div class="study-block">No findings yet. Add your first observation from an essay using the sidebar.</div>');
 }
 function showFindingEditor(essayId,noteId){
  const e=db.essays.find(x=>x.id===essayId)||(!essayId?selected():null);if(!e)return toast('Select a source essay first.');
@@ -1396,7 +1409,7 @@ function eventBindings(){D('findingForm').addEventListener('submit',submitFindin
    const notebook=D('argumentWorkbookBody'),card=D('argumentCard-'+(Number(id)-1));
    if(notebook&&card)notebook.scrollTo({top:card.offsetTop-notebook.offsetTop+notebook.scrollTop-46,behavior:'smooth'});
   }
- }break;case'findings':setMode('findings');break;case'addFinding':showFindingEditor();break;case'editFinding':showFindingEditor(btn.dataset.essay,id);break;case'deleteFinding':removeFinding(btn.dataset.essay,id);break;case'home':setMode('dashboard');break;case'addEssay':showCreate();break;case'selectEssay':db.selectedId=id;argumentView='whole';argumentParagraphIndex=0;stageSourceTop=0;readerSourceTop=0;save();setMode('overview');break;case'overview':setMode('overview');break;case'stage':setMode('stage',id);break;case'prevTask':taskNav(progress(selected(),stageId).session.current-1);break;case'nextTask':taskNav(progress(selected(),stageId).session.current+1);break;case'task':mode='stage';taskNav(Number(id));break;case'checkTask':await checkTask();break;case'checkCloze':checkCloze();break;case'redo':redo();break;case'retryTask':retryTask();break;case'resultsSummary':summaryView();break;case'scrollGap':{const gap=D('gap-'+id);gap?.scrollIntoView({behavior:'smooth',block:'center'});gap?.querySelector('input')?.focus();break;}case'toggleSource':showSource=!showSource;render();break;case'export':exportProgress();break;case'import':D('importFile').click();break;case'enhanceAI':await enhance();break;case'explainAI':await explainAI(Number(id));break;case'deleteEssay':{const e=selected();if(!confirm(`Permanently delete "${e.title}" and all its attempts from this browser? Export a backup first if you need it.`))return;db.deletedIds ||= [];if(!db.deletedIds.includes(e.id))db.deletedIds.push(e.id);db.essays=db.essays.filter(x=>x.id!==e.id);db.selectedId=db.essays[0]?.id||null;save();setMode('dashboard');toast('Essay deleted.');break;}case'saveSettings':{const inp=D('accessInput');if(inp)db.accessCode=inp.value;save();closeModal('settingsModal');toast('Settings saved.');break;}}
+ }break;case'openLegacyFinding':if(db.essays.some(e=>e.id===id)){db.selectedId=id;argumentView='whole';argumentParagraphIndex=0;stageSourceTop=0;readerSourceTop=0;save();setMode('stage','1');}break;case'findings':setMode('findings');break;case'addFinding':showFindingEditor();break;case'editFinding':showFindingEditor(btn.dataset.essay,id);break;case'deleteFinding':removeFinding(btn.dataset.essay,id);break;case'home':setMode('dashboard');break;case'addEssay':showCreate();break;case'selectEssay':db.selectedId=id;argumentView='whole';argumentParagraphIndex=0;stageSourceTop=0;readerSourceTop=0;save();setMode('overview');break;case'overview':setMode('overview');break;case'stage':setMode('stage',id);break;case'prevTask':taskNav(progress(selected(),stageId).session.current-1);break;case'nextTask':taskNav(progress(selected(),stageId).session.current+1);break;case'task':mode='stage';taskNav(Number(id));break;case'checkTask':await checkTask();break;case'checkCloze':checkCloze();break;case'redo':redo();break;case'retryTask':retryTask();break;case'resultsSummary':summaryView();break;case'scrollGap':{const gap=D('gap-'+id);gap?.scrollIntoView({behavior:'smooth',block:'center'});gap?.querySelector('input')?.focus();break;}case'toggleSource':showSource=!showSource;render();break;case'export':exportProgress();break;case'import':D('importFile').click();break;case'enhanceAI':await enhance();break;case'explainAI':await explainAI(Number(id));break;case'deleteEssay':{const e=selected();if(!confirm(`Permanently delete "${e.title}" and all its attempts from this browser? Export a backup first if you need it.`))return;db.deletedIds ||= [];if(!db.deletedIds.includes(e.id))db.deletedIds.push(e.id);db.essays=db.essays.filter(x=>x.id!==e.id);db.selectedId=db.essays[0]?.id||null;save();setMode('dashboard');toast('Essay deleted.');break;}case'saveSettings':{const inp=D('accessInput');if(inp)db.accessCode=inp.value;save();closeModal('settingsModal');toast('Settings saved.');break;}}
  });
 }
 async function initialize(){db=load();if(!db.selectedId)db.selectedId=db.essays[0]?.id;eventBindings();render();try{const r=await fetch('/api/health');if(r.ok){const d=await r.json();ai.enabled=!!d.ai;ai.model=d.model;ai.accessCodeRequired=!!d.accessCodeRequired;render();}}catch{ /* Standalone HTML continues in offline mode. */ }
