@@ -631,7 +631,7 @@ button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoC
 .findings-note-meta .btn{font-size:14px;padding:5px 9px}
 .finding-editor{width:100%;min-height:180px;font:inherit;font-size:19px;line-height:1.5;padding:12px;resize:vertical;border:1px solid #a9bad3;border-radius:8px}
 .finding-empty{padding:8px;font-size:18px;line-height:1.5;color:#617085}
-</style>
+.quick-finding-form{flex:0 0 auto;min-width:0;padding:4px 3px 8px}.quick-finding-hint{display:block;font-size:15px;font-weight:800;color:#17458e;margin-bottom:5px}.quick-finding-form textarea{display:block;width:100%;box-sizing:border-box;min-height:76px;max-height:150px;resize:vertical;border:1.5px solid #9bb6dd;border-radius:8px;padding:9px 10px;background:#fff;font:inherit;font-size:20px;line-height:1.4;color:#203451}.quick-finding-form textarea:focus{outline:2px solid #4277cb;outline-offset:1px}.quick-finding-help{font-size:13px;line-height:1.35;color:#617085;display:flex;align-items:center;justify-content:space-between;gap:5px;margin-top:5px}.quick-finding-help .btn{font-size:14px;padding:4px 8px;min-height:30px}</style>
   <title>Style First — Writing Mastery Lab</title>
 </head>
 <body>
@@ -662,7 +662,7 @@ button.btn:is([data-action="redo"],[data-action="retryTask"],[data-action="redoC
           <div id="librarySide" class="library-side"></div>
           <div id="inspectorContent"></div>
           <div class="sidebar-rule"></div>
-          <div class="side-study-split"><section class="side-study-section"><div class="sidebar-caption">EXERCISES</div><div id="stageNav"></div></section><section class="side-study-section side-findings"><div class="side-findings-head"><div class="sidebar-caption">INTERESTING FINDINGS</div><button class="btn finding-add" id="findingAddSide" data-action="addFinding">+ Add</button></div><button class="finding-all" id="findingAllSide" data-action="findings">All findings →</button><div class="side-findings-source" id="findingSideSource"></div><div id="findingSideList"></div></section></div>
+          <div class="side-study-split"><section class="side-study-section"><div class="sidebar-caption">EXERCISES</div><div id="stageNav"></div></section><section class="side-study-section side-findings"><div class="side-findings-head"><div class="sidebar-caption">INTERESTING FINDINGS</div></div><button class="finding-all" id="findingAllSide" data-action="findings">All findings →</button><div class="side-findings-source" id="findingSideSource"></div><form id="quickFindingForm" class="quick-finding-form"><label for="quickFindingInput" id="quickFindingHint" class="quick-finding-hint"></label><textarea id="quickFindingInput" rows="3" maxlength="5000" aria-label="Write an interesting finding for the current essay" placeholder="Write a finding here…"></textarea><div class="quick-finding-help"><span>Enter to save · Shift + Enter for a new line</span><button type="submit" class="btn btn-blue" id="quickFindingSave">Save</button></div></form><div id="findingSideList"></div></section></div>
           <div class="sidebar-rule"></div>
           <button class="nav-utility" id="exportButton"><span data-icon="download"></span> Export my progress</button>
           <button class="nav-utility" id="importButton"><span data-icon="upload"></span> Import progress</button>
@@ -1151,11 +1151,11 @@ const SHORTCUT_STORAGE='style-first-keyboard-shortcuts-v1';
 const SHORTCUT_GROUPS=[
  ['Blank navigation',[['nextBlank','Next blank'],['previousBlank','Previous blank']]],
  ['Page scrolling',[['pageUp','Scroll entire page up'],['pageDown','Scroll entire page down'],['otherPageUp','Scroll opposite panel up'],['otherPageDown','Scroll opposite panel down']]],
- ['Exercise actions',[['check','Check answers / corrections'],['nextTask','Next question'],['retryQuestion','Try this question again'],['prevTask','Previous question'],['nextStage','Next exercise'],['prevStage','Previous exercise'],['retryMistakes','Retry incorrect answers'],['redo','Redo entire exercise'],['original','Open original essay'],['returnExercise','Return to exercise'],['focusAnswer','Focus answer field'],['dashboard','Open dashboard'],['save','Save progress'],['settings','Open keyboard shortcuts']]],
+ ['Exercise actions',[['check','Check answers / corrections'],['nextTask','Next question'],['retryQuestion','Try this question again'],['prevTask','Previous question'],['nextStage','Next exercise'],['prevStage','Previous exercise'],['retryMistakes','Retry incorrect answers'],['redo','Redo entire exercise'],['original','Open original essay'],['returnExercise','Return to exercise'],['focusAnswer','Focus answer field'],['focusFinding','Focus interesting findings box'],['focusFindingFallback','Focus findings box (alternate)'],['dashboard','Open dashboard'],['save','Save progress'],['settings','Open keyboard shortcuts']]],
  ['Text editing',[['selectAll','Select all text in answer'],['undoText','Undo text edit'],['redoText','Redo text edit'],['copy','Copy selection'],['cut','Cut selection'],['paste','Paste text']]]
 ];
 const SHORTCUT_IDS=SHORTCUT_GROUPS.flatMap(g=>g[1].map(a=>a[0]));
-const SHORTCUT_DEFAULTS={nextBlank:'Tab',previousBlank:'Shift+Tab',pageUp:'Shift+PageUp',pageDown:'Shift+PageDown',otherPageUp:'Ctrl+PageUp',otherPageDown:'Ctrl+PageDown',nextTask:'Y',retryQuestion:'N'};
+const SHORTCUT_DEFAULTS={nextBlank:'Tab',previousBlank:'Shift+Tab',pageUp:'Shift+PageUp',pageDown:'Shift+PageDown',otherPageUp:'Ctrl+PageUp',otherPageDown:'Ctrl+PageDown',nextTask:'Y',retryQuestion:'N',focusFinding:'Ctrl+Shift+I',focusFindingFallback:'Ctrl+Alt+I'};
 let shortcutRecording=null,shortcutBindings=null;
 function getShortcuts(){
  if(shortcutBindings)return shortcutBindings;
@@ -1239,6 +1239,7 @@ function scrollOppositePanel(target,delta){
  return true;
 }
 function runShortcut(id,target){
+ if(id==='focusFinding'||id==='focusFindingFallback')return focusFinding();
  const main=D('mainContent'),editing=target?.matches?.('input:not([type=button]):not([type=checkbox]),textarea,[contenteditable=true]')&&!target.disabled&&!target.readOnly;
  if(id==='nextBlank'||id==='previousBlank')return moveBlank(target,id==='nextBlank'?1:-1);
  if(id==='otherPageUp'||id==='otherPageDown')return scrollOppositePanel(target,id==='otherPageUp'?-1:1);
@@ -1284,7 +1285,8 @@ function runShortcut(id,target){
  return false;
 }
 function shortcutKeydown(ev){
- if(ev.isComposing)return;
+ if(ev.isComposing||ev.keyCode===229)return;
+ if(ev.target?.id==='quickFindingInput'&&ev.key==='Enter'&&!ev.shiftKey&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&!shortcutRecording){ev.preventDefault();ev.stopImmediatePropagation();if(!ev.repeat)submitQuickFinding();return;}
  if(shortcutRecording){
   ev.preventDefault();ev.stopImmediatePropagation();
   const id=shortcutRecording;
@@ -1293,7 +1295,7 @@ function shortcutKeydown(ev){
   if(!shortcutAllowed(chord,id)){toast('Use Ctrl, Cmd or Alt with a key, or a function key. Single letters are allowed for question navigation, retry and checking. Tab and Shift + Page Up/Down are reserved for navigation.');return;}
   const bindings=getShortcuts(),other=SHORTCUT_IDS.find(x=>x!==id&&bindings[x]===chord);
   if(other){toast('That shortcut is already assigned. Clear it first.');return;}
-  bindings[id]=chord;persistShortcuts();shortcutRecording=null;refreshShortcutTab();refreshButtonHotkeys();return;
+  bindings[id]=chord;persistShortcuts();shortcutRecording=null;refreshShortcutTab();refreshButtonHotkeys();refreshFindingHint();return;
  }
  if(ev.defaultPrevented||document.querySelector('.modal-backdrop:not([hidden])'))return;
  const chord=shortcutChord(ev),id=SHORTCUT_IDS.find(x=>getShortcuts()[x]&&getShortcuts()[x]===chord);
@@ -1308,12 +1310,13 @@ function shortcutSettingsClick(ev){
  shortcutRecording=null;
  if(btn.hasAttribute('data-shortcut-clear'))getShortcuts()[btn.dataset.shortcutClear]='';
  if(btn.hasAttribute('data-shortcut-reset'))shortcutBindings=Object.fromEntries(SHORTCUT_IDS.map(id=>[id,SHORTCUT_DEFAULTS[id]||'']));
- persistShortcuts();refreshShortcutTab();refreshButtonHotkeys();
+ persistShortcuts();refreshShortcutTab();refreshButtonHotkeys();refreshFindingHint();
 }
 
 
 /* Findings are user-authored, attached to stable essay IDs. */
 let findingEdit=null;
+const quickFindingDrafts=new Map();
 function activeFindings(e){
  return (Array.isArray(e?.findings)?e.findings:[]).filter(n=>n&&typeof n.id==='string'&&typeof n.text==='string'&&!n.deleted).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
 }
@@ -1323,10 +1326,10 @@ function renderFindingSide(){
  const e=selected(),list=D('findingSideList');if(!list)return;
  const top=list.scrollTop,notes=activeFindings(e);
  D('findingSideSource').textContent=e?e.title:'Select an essay';
- D('findingAddSide').disabled=!e;
+ const input=D('quickFindingInput');if(input){const next=e?.id||'';if(input.dataset.essay!==next){if(input.dataset.essay)quickFindingDrafts.set(input.dataset.essay,input.value);input.dataset.essay=next;input.value=quickFindingDrafts.get(next)||'';}input.disabled=!e;D('quickFindingSave').disabled=!e||!input.value.trim();}refreshFindingHint();
  D('findingAllSide').textContent='All findings ('+findingsCount()+') →';
  D('navFindings').classList.toggle('active',mode==='findings');
- list.innerHTML=notes.length?notes.map(n=>'<div class="finding-side-card">'+esc(n.text)+'<button data-action="editFinding" data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'">Edit</button></div>').join(''):'<p class="finding-empty">Save an expression, grammar insight or observation worth remembering.</p>';
+ list.innerHTML=notes.length?notes.map(n=>'<div class="finding-side-card">'+esc(n.text)+'<button data-action="editFinding" data-essay="'+esc(e.id)+'" data-id="'+esc(n.id)+'">Edit</button></div>').join(''):'<p class="finding-empty">No findings saved for this essay yet.</p>';
  list.scrollTop=top;
 }
 function renderFindings(){
@@ -1348,6 +1351,9 @@ function writeFinding(e,noteId,text,now=new Date().toISOString()){
  else{if(e.findings.length>=1000)return false;e.findings.push({id:ID(),text,createdAt:now,updatedAt:now});}
  return true;
 }
+function refreshFindingHint(){const el=D('quickFindingHint');if(!el)return;const key=getShortcuts().focusFinding,alt=getShortcuts().focusFindingFallback;el.textContent='Quick capture'+(key?' ('+shortcutDisplay('focusFinding')+')':'')+(alt?' · '+shortcutDisplay('focusFindingFallback'):'');}
+function focusFinding(){const input=D('quickFindingInput');if(!input||input.disabled)return false;D('sidebar').classList.add('open');input.scrollIntoView({block:'nearest'});input.focus({preventScroll:true});return true;}
+function submitQuickFinding(ev){if(ev)ev.preventDefault();const input=D('quickFindingInput'),e=db.essays.find(x=>x.id===input?.dataset.essay);if(!e||!input.value.trim())return false;if(!writeFinding(e,null,input.value)){toast('Unable to save finding.');return false;}save();input.value='';quickFindingDrafts.delete(e.id);renderFindingSide();if(mode==='findings')render();D('findingSideList').scrollTop=0;input.focus({preventScroll:true});toast('Finding saved.');return true;}
 function submitFinding(ev){
  ev.preventDefault();const e=db.essays.find(x=>x.id===findingEdit?.essayId);if(!e)return;
  if(!writeFinding(e,findingEdit.noteId,D('findingText').value)){toast('Enter a finding of 1–5000 characters.');return;}
@@ -1358,7 +1364,7 @@ function removeFinding(essayId,id){
  n.deleted=true;n.text='';n.updatedAt=new Date().toISOString();save();renderFindingSide();if(mode==='findings')render();toast('Finding deleted.');
 }
 
-function eventBindings(){D('findingForm').addEventListener('submit',submitFinding);for(const el of document.querySelectorAll('[data-icon]'))el.innerHTML=icon(el.dataset.icon);
+function eventBindings(){D('findingForm').addEventListener('submit',submitFinding);D('quickFindingForm').addEventListener('submit',submitQuickFinding);D('quickFindingInput').addEventListener('input',ev=>{const input=ev.target;if(input.dataset.essay)quickFindingDrafts.set(input.dataset.essay,input.value);D('quickFindingSave').disabled=!input.value.trim()||input.disabled;});for(const el of document.querySelectorAll('[data-icon]'))el.innerHTML=icon(el.dataset.icon);
  D('menuToggle').onclick=()=>D('sidebar').classList.toggle('open');D('brandHome').onclick=()=>setMode('dashboard');D('newEssayTop').onclick=showCreate;D('newEssaySide').onclick=showCreate;D('navHome').onclick=()=>setMode('dashboard');D('navReader').onclick=()=>{if(selected())setMode('reader');};D('settingsButton').onclick=()=>{settings();openModal('settingsModal');};D('exportButton').onclick=exportProgress;D('importButton').onclick=()=>D('importFile').click();
  D('importFile').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{importProgress(await f.text());}catch(error){toast(error.message);}e.target.value='';};
  D('essayInput').addEventListener('input',e=>D('inputWordCount').textContent=wordCount(e.target.value)+' words');D('essayForm').addEventListener('submit',createEssay);D('renameEssayForm').addEventListener('submit',submitRenameEssay);D('renameEssayModal').addEventListener('keydown',ev=>{if(ev.key==='Escape'){ev.preventDefault();closeModal('renameEssayModal');}});
