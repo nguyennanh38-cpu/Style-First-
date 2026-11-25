@@ -1166,7 +1166,7 @@ function refreshButtonHotkeys(){
  }
 }
 function shortcutTabHTML(){
- return '<div class="shortcut-intro">Choose a shortcut, then press the desired keys. Default navigation: Tab / Shift + Tab move between blanks; Shift + Page Up / Down scroll the whole page; Ctrl + Page Up / Down scroll the opposite panel without moving your cursor. All six navigation shortcuts are listed below. N retries the current question and Y advances to the next question after feedback. Single-letter shortcuts are inactive while typing. Standard browser and OS text-editing shortcuts still work when not overridden. Shortcuts are saved on this device.</div>'+
+ return '<div class="shortcut-intro">Choose a shortcut, then press the desired keys. Default navigation: Tab / Shift + Tab move between blanks; Shift + Page Up / Down scroll the whole page; Ctrl + Page Up / Down scroll the opposite panel without moving your cursor. All six navigation shortcuts are listed below. N retries the current question and Y advances to the next question only after your answer has been checked and focus is outside all typing fields. Single-letter shortcuts are inactive while typing. Standard browser and OS text-editing shortcuts still work when not overridden. Shortcuts are saved on this device.</div>'+
  SHORTCUT_GROUPS.map(([group,items])=>'<section class="shortcut-group"><h3>'+esc(group)+'</h3>'+items.map(([id,label])=>'<div class="shortcut-row"><span>'+esc(label)+'</span><button type="button" class="btn btn-outline shortcut-key" data-shortcut-record="'+id+'" aria-label="Set shortcut for '+esc(label)+'">'+esc(shortcutDisplay(id))+'</button><button type="button" class="btn btn-ghost shortcut-clear" data-shortcut-clear="'+id+'" aria-label="Clear shortcut for '+esc(label)+'" '+(!getShortcuts()[id]?'disabled':'')+'>Clear</button></div>').join('')+'</section>').join('')+
  '<p class="shortcut-intro">Some browser or operating-system shortcuts cannot be overridden. Blank navigation skips disabled answers and stays within the current exercise until the first or last blank; Tab can then leave the fields normally.</p><button type="button" class="btn btn-outline" data-shortcut-reset>Reset defaults</button>';
 }
@@ -1246,10 +1246,14 @@ function runShortcut(id,target){
   if(panel)return shortcutClick(panel.id==='clozeRetryPanel'?'checkClozeRetry':'checkMistakeReview',panel);
   return ['checkClozeRetry','checkMistakeReview','checkTask','checkCloze'].some(a=>shortcutClick(a,main));
  }
- if(id==='retryQuestion')return shortcutClick('retryTask',main);
+ if(id==='retryQuestion'||id==='nextTask'){
+  if(target?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable=false]),[role=textbox]')||document.activeElement?.closest?.('input,textarea,select,[contenteditable]:not([contenteditable=false]),[role=textbox]'))return false;
+  const p=selected()?.progress?.[stageId]?.session,feedback=main?.querySelector('#feedbackPanel');
+  if(!p?.results?.[p.current]||!feedback?.getClientRects().length)return false;
+  return id==='retryQuestion'?shortcutClick('retryTask',feedback):shortcutClick('nextTask',feedback)||shortcutClick('resultsSummary',feedback);
+ }
  if(id==='retryMistakes')return ['redoClozeRetry','redoMistakeReview','retryTask'].some(a=>shortcutClick(a,main));
  if(id==='redo')return shortcutClick('redo',main);
- if(id==='nextTask')return shortcutClick('nextTask',main)||shortcutClick('resultsSummary',main);
  if(id==='prevTask')return shortcutClick(id,main);
  if(id==='nextStage'||id==='prevStage'){const i=STAGES.findIndex(s=>s.id===stageId),next=STAGES[i+(id==='nextStage'?1:-1)];if(!next)return false;setMode('stage',next.id);return true;}
  return false;
