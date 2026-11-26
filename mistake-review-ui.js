@@ -13,7 +13,16 @@ function stateFor(p,index,original,answer){
  p.session.mistakeReviews ||= {};
  const old=p.session.mistakeReviews[index];
  if(!old||old.source!==answer||old.original!==original)
-  p.session.mistakeReviews[index]={source:answer,original,drafts:{},checked:false,attempts:0};
+  p.session.mistakeReviews[index]={source:answer,original,drafts:{},checked:false,attempts:0,alignmentVersion:2};
+ else if(old.alignmentVersion!==2){
+  // Keep the old review intact as a backup and transfer answers for unchanged spans.
+  const prior=root.MistakeReview.buildLegacy(original,answer),next=root.MistakeReview.build(original,answer);
+  const spans=c=>{let offset=0;return c.parts.flatMap(part=>{const start=offset;offset+=(part.type==='text'?part.text:part.expected).length;return part.type==='blank'?[{start,end:offset,index:part.index,expected:part.expected}]:[];});};
+  const oldSpans=spans(prior),newSpans=spans(next),drafts={};
+  for(const n of newSpans){const p=oldSpans.find(x=>x.start===n.start&&x.end===n.end);if(p&&Object.prototype.hasOwnProperty.call(old.drafts||{},p.index))drafts[n.index]=old.drafts[p.index];}
+  const unchanged=oldSpans.length===newSpans.length&&newSpans.every((n,i)=>n.start===oldSpans[i].start&&n.end===oldSpans[i].end);
+  p.session.mistakeReviews[index]={...old,legacyReview:{drafts:{...old.drafts},checked:old.checked},drafts,checked:unchanged&&old.checked,alignmentVersion:2};
+ }
  return p.session.mistakeReviews[index];
 }
 function renderReview(original,answer,p,index){
@@ -39,7 +48,7 @@ function renderReview(original,answer,p,index){
  const summary=m.checked?'<strong class="mistake-review-result">'+correctCount+'/'+cloze.blanks.length+' correct · '+Math.round(100*correctCount/cloze.blanks.length)+'%</strong>':'';
  return '<section class="mistake-review-panel" id="mistakeReviewPanel" aria-label="Retry incorrect expressions">'+
  '<div class="mistake-review-title"><div><div class="eyebrow">TARGETED PRACTICE</div><h3>Review your mistakes</h3></div><span class="tag blue">'+cloze.blanks.length+' '+(cloze.blanks.length===1?'expression':'expressions')+' to revisit</span></div>'+
- '<p class="mistake-review-intro">Only the wording you missed is hidden. Type the <strong>author’s exact expressions</strong> directly in the passage. Press Tab to move between gaps.</p>'+
+ '<p class="mistake-review-intro">Only unmatched original words are hidden. Extra words are listed separately below. Type the <strong>author’s exact expressions</strong> directly in the passage. Press Tab to move between gaps.</p>'+
  '<div class="cloze-passage mistake-review-passage">'+missing+'</div>'+
  '<div class="mistake-review-footer"><span class="footer-hint">Blank number · number of missing words. Does not change your original score.</span><div class="btn-group">'+summary+
  (m.checked?'<button class="btn btn-outline" data-action="redoMistakeReview">Try these blanks again</button>':'<button class="btn btn-blue" data-action="checkMistakeReview">Check my corrections</button>')+
