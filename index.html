@@ -1005,27 +1005,14 @@ function renderTask(data,p,st,i){const task=data.tasks[i],ses=p.session,result=s
  return `<div class="section-heading"><h2>Practice questions</h2><span>${Object.keys(ses.results).length} of ${data.tasks.length} checked</span></div>${dots}<section class="study-block"><div class="task-topline"><div class="task-meta">${icon(task.kind==='reasoning'?'lightbulb':'edit')} ${task.kind==='reasoning'?'CRITICAL REASONING':task.kind==='essay'?'FULL ESSAY RECALL':'EXACT-WORD RECONSTRUCTION'}</div><span class="task-counter">${i+1} / ${data.tasks.length}</span></div><p class="task-question">${esc(q)}</p>${context?`<div class="task-context">${esc(context)}</div>`:''}${task.hint?`<div class="hint-box">${icon('lightbulb')}<span>${esc(task.hint)}</span></div>`:''}<div class="answer-label">YOUR ANSWER</div><textarea class="answer-box ${task.kind==='essay'?'big':''}" id="answerArea" data-task="${i}" ${result?'':''} spellcheck="true" placeholder="Write your answer here. Your work is saved as you type...">${esc(answer)}</textarea><div class="task-footer"><div class="footer-hint">Set an optional check shortcut in Settings → Keyboard Shortcuts</div><div class="btn-group"><button class="btn btn-ghost" data-action="prevTask" ${i===0?'disabled':''}>${icon('chevronLeft')} Previous</button><button class="btn btn-blue" data-action="checkTask" ${!answer.trim()?'disabled':''} id="checkTaskButton">${icon('check')} ${result?'Check again':'Check answer'}</button></div></div>${result?renderFeedback(result,task,st,i,data.tasks.length,done):''}</section>`;
 }
 function markDifferences(original,student){
-  const a=String(original).split(/(\s+)/),b=String(student).trim().split(/\s+/).filter(Boolean);
-  const w=a.filter(t=>t.trim());if(w.length>550)return esc(original);
-  const norm=s=>s.normalize('NFKC').toLowerCase().replace(/[\u2018\u2019\u02bc\u201b\uFF07]/g,"'").replace(/[\u2010-\u2015\u2212]/g,'-').replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,'');
-  const p=w.map(norm),q=b.map(norm),m=p.length,n=q.length;
-  if(m*n>400000)return esc(original);
-  const dp=Array.from({length:m+1},()=>new Uint16Array(n+1));
-  for(let i=m-1;i>=0;i--)for(let j=n-1;j>=0;j--)dp[i][j]=p[i]===q[j]&&p[i]!==''?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
-  const matched=new Set();let i=0,j=0;
-  while(i<m&&j<n){if(p[i]===q[j]&&p[i]!==''){matched.add(i);i++;j++;}else if(dp[i+1][j]>=dp[i][j+1])i++;else j++;}
-  let pos=0;return a.map(t=>t.trim()?matched.has(pos++)?esc(t):`<strong class="highlight-error">${esc(t)}</strong>`:esc(t)).join('');
+ const text=String(original),review=window.MistakeReview?.build(text,student);
+ if(!review||review.tooLong)return esc(text);
+ let cursor=0,out='';
+ for(const w of review.errorWords||[]){out+=esc(text.slice(cursor,w.start))+'<strong class="highlight-error">'+esc(text.slice(w.start,w.end))+'</strong>';cursor=w.end;}
+ return out+esc(text.slice(cursor));
 }
 function insertedWords(original,student){
-  const tokenize=t=>String(t).trim().split(/\s+/).filter(Boolean).map(w=>w.normalize('NFKC').toLowerCase().replace(/[\u2018\u2019\u02bc\u201b\uFF07]/g,"'").replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu,''));
-  const a=tokenize(original),b=tokenize(student);
-  if(a.length*b.length>400000)return [];
-  const dp=Array.from({length:a.length+1},()=>new Uint16Array(b.length+1));
-  for(let i=a.length-1;i>=0;i--)for(let j=b.length-1;j>=0;j--)dp[i][j]=a[i]===b[j]?dp[i+1][j+1]+1:Math.max(dp[i+1][j],dp[i][j+1]);
-  const extra=[];let i=0,j=0;
-  while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;}else if(dp[i+1][j]>=dp[i][j+1])i++;else extra.push(b[j++]);}
-  while(j<b.length)extra.push(b[j++]);
-  return extra;
+ return window.MistakeReview?.build(original,student)?.extra||[];
 }
 function pTemp(task,i){return progress(selected(),stageId).session.drafts[i]||'';}
 function renderFeedback(r,task,st,i,n,done){const exact=r.exact;const type=r.pending?'pending':exact?'correct':'incorrect';const style=r.score===null?'REFERENCE':exact?'EXACT MATCH':r.severity==='minor'?'MINOR DIFFERENCE':'NEEDS REVISION';let aiNotes=r.aiGrade;
